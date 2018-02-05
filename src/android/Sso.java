@@ -14,7 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class LineLogin extends CordovaPlugin {
+public class Sso extends CordovaPlugin {
 
     String channelId;
     CallbackContext callbackContext;
@@ -22,13 +22,14 @@ public class LineLogin extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray data, CallbackContext callbackContext) throws JSONException {
 
-        if (action.equals("initialize")) {
-            JSONObject params = data.getJSONObject(0);
-            channelId = params.get("channel_id").toString();
-            return true;
-        } else if (action.equals("login")) {
+        // if (action.equals("initialize")) {
+        //     JSONObject params = data.getJSONObject(0);
+        //     channelId = params.get("channel_id").toString();
+        //     return true;
+        // } else 
+        if (action.equals("loginWithLine")) {
             Context context = this.cordova.getActivity().getApplicationContext();
-            Intent loginIntent = LineLoginApi.getLoginIntent(context, channelId);
+            Intent loginIntent = LineLoginApi.getLoginIntent(context, Constants.CHANNEL_ID);
             this.cordova.startActivityForResult((CordovaPlugin) this, loginIntent, 0);
             this.callbackContext = callbackContext;
             return true;
@@ -44,10 +45,14 @@ public class LineLogin extends CordovaPlugin {
         JSONObject json = new JSONObject();
         if (result.getResponseCode() == LineApiResponseCode.SUCCESS) {
             LineProfile profile = result.getLineProfile();
+            String accessToken = result.getLineCredential().getAccessToken().getAccessToken();
+
             try {
                 json.put("userID", profile.getUserId());
                 json.put("displayName", profile.getDisplayName());
                 json.put("pictureURL", profile.getPictureUrl());
+                json.put("accessToken", accessToken);
+
                 callbackContext.success(json);
             } catch (JSONException e) {
                 callbackContext.error(-1);

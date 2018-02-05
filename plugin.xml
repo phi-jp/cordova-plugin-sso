@@ -58,7 +58,7 @@
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="Sso">
-        <param name="android-package" value="plugin.line.Sso"/>
+        <param name="android-package" value="Sso"/>
       </feature>
     </config-file>
     <source-file src="src/android/Sso.java" target-dir="src/plugin/line" />
