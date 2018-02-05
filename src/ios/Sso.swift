@@ -1,5 +1,6 @@
 import Foundation
 import LineSDK
+import TwitterKit
 
 @objc(Sso) class Sso : CDVPlugin, LineSDKLoginDelegate {
     
@@ -7,15 +8,47 @@ import LineSDK
     
 
     override func pluginInitialize() {
+
         LineSDKLogin.sharedInstance().delegate = self
-        
         // let result = CDVPluginResult(status: CDVCommandStatus_OK)
         // commandDelegate.send(result, callbackId:command.callbackId)
+
+        let consumerKey = self.commandDelegate.settings["twitterconsumerkey"] as? String)
+        let consumerSecret = self.commandDelegate.settings["twitterconsumersecret"] as? String
+        
+        Twitter.sharedInstance().start(withConsumerKey: consumerKey!, consumerSecret: consumerSecret!);
     }
 
     func loginWithLine(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
         LineSDKLogin.sharedInstance().start()
+    }
+
+    func loginWithTwitter(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId
+        Twitter.sharedInstance().logIn(completion: { (session, error) in
+            if (session != nil) {
+                var data = ["userName": nil, "userId": nil, "secret": nil, "token": nil] as [String: Any?]
+                if let userName = session?.userName {
+                    data.updateValue(userName, forKey: "userName")
+                }
+                if let userID = session?.userID {
+                    data.updateValue(userID, forKey: "userId")
+                }
+                if let secret = session?.authTokenSecret {
+                    data.updateValue(secret, forKey: "secret")
+                }
+                if let token = session?.authToken {
+                    data.updateValue(token, forKey: "token")
+                }
+
+                let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: data)
+                self.commandDelegate.send(result, callbackId:self.callbackId)
+            } else {
+                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.debugDescription)
+                self.commandDelegate.send(result, callbackId:self.callbackId)
+            }
+        })
     }
     
     func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
