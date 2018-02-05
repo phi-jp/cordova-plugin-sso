@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-sso" version="0.1">
+  <name>Sso</name>
+  <js-module src="www/sso.js" >
+    <clobbers target="sso" />
+  </js-module>
+
+  <preference name="LINE_BUNDLE_ID" default="com.example.test" />
+  <preference name="LINE_CHANNEL_ID" />
+
+  <!-- iOS -->
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="Sso">
+        <param name="onload" value="true" />
+        <param name="ios-package" value="Sso" />
+      </feature>
+    </config-file>
+    <config-file target="*-Info.plist" parent="LineSDKConfig">
+      <dict>
+        <key>ChannelID</key>
+        <string>$LINE_CHANNEL_ID</string>
+      </dict>
+    </config-file>
+    <config-file target="*-Info.plist" parent="CFBundleURLTypes">
+      <array>
+        <dict>
+          <key>CFBundleTypeRole</key>
+          <string>Editor</string>
+          <key>CFBundleURLSchemes</key>
+          <array>
+            <string>$LINE_BUNDLE_ID</string>
+          </array>
+        </dict>
+      </array>
+    </config-file>
+    <config-file target="*-Info.plist" parent="LSApplicationQueriesSchemes">
+      <array>
+        <string>lineauth</string>
+        <string>$LINE_BUNDLE_ID</string>
+      </array>
+    </config-file>
+
+    <source-file src="src/ios/AppDelegate+Sso.h" />
+    <source-file src="src/ios/AppDelegate+Sso.m" />
+    
+    <source-file src="src/ios/sso.swift" />
+
+    <framework src="src/ios/LineSDK.framework" custom="true" />
+    <framework src="Security.framework" />
+    <framework src="CoreTelephony.framework" />
+
+    <dependency id="cordova-plugin-add-swift-support" version="1.7.1"/>
+    <preference name="UseSwiftLanguageVersion" default="4" />
+  </platform>
+
+  <!-- Android -->
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="Sso">
+        <param name="android-package" value="plugin.line.Sso"/>
+      </feature>
+    </config-file>
+    <source-file src="src/android/Sso.java" target-dir="src/plugin/line" />
+
+    <lib-file src="src/android/line-sdk-4.0.5.aar" />
+    
+    <config-file target="AndroidManifest.xml" parent="/*">
+      <uses-permission android:name="android.permission.INTERNET" />
+    </config-file>
+
+    <framework src="src/android/line.gradle" custom="true" type="gradleReference" />
+    
+  </platform>
+
+</plugin>
