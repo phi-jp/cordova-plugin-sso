@@ -8,5 +8,5 @@
 
 #import "AppDelegate.h"
 
-@interface AppDelegate (LineLogin)
+@interface AppDelegate (Sso)
 @end

@@ -1,2 +1,2 @@
-#import "LineSDK"
 #import <TwitterKit/TwitterKit.h>
+#import "AppDelegate.h"
