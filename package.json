@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-sso",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "cordova-plugin-sso",
   "cordova" : {
     "id": "cordova-plugin-sso-facebook",
@@ -18,7 +18,7 @@
     "type": "git",
     "url": "git+https://github.com/phi-jp/cordova-plugin-sso.git"
   },
-  "author": "shogo",
+  "author": "phi",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/phi-jp/cordova-plugin-sso/issues"
