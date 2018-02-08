@@ -9,13 +9,13 @@
     <clobbers target="sso" />
   </js-module>
 
-  <preference name="LINE_BUNDLE_ID" default="" />
-  <preference name="LINE_CHANNEL_ID" default="" />
+  <preference name="LINE_BUNDLE_ID" default="0000" />
+  <preference name="LINE_CHANNEL_ID" default="0000" />
 
-  <preference name="TWITTER_KEY" default="" />
-  <preference name="TWITTER_SECRET" default="" />
+  <preference name="TWITTER_KEY" default="0000" />
+  <preference name="TWITTER_SECRET" default="0000" />
 
-  <preference name="FACEBOOK_APP_ID" default="" />
+  <preference name="FACEBOOK_APP_ID" default="0000" />
 
   <!-- iOS -->E
   <platform name="ios">
