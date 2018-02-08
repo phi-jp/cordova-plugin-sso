@@ -1,12 +1,14 @@
 import Foundation
 import LineSDK
 import TwitterKit
+//import FBSDKCoreKit
+//import FBSDKLoginKit
 
 @objc(Sso) class Sso : CDVPlugin, LineSDKLoginDelegate {
     
     var callbackId:String?
     
-
+    // init
     override func pluginInitialize() {
         // for LINE
         LineSDKLogin.sharedInstance().delegate = self
@@ -18,7 +20,12 @@ import TwitterKit
         let consumerKey = self.commandDelegate.settings["twitterconsumerkey"] as? String
         let consumerSecret = self.commandDelegate.settings["twitterconsumersecret"] as? String
         Twitter.sharedInstance().start(withConsumerKey: consumerKey!, consumerSecret: consumerSecret!);
+
+        // for Facebook
+//        FBSDKApplicationDelegate.sharedInstance().application(UIApplication.shared, didFinishLaunchingWithOptions: [:])
     }
+
+
     
     // for LINE
     func loginWithLine(_ command: CDVInvokedUrlCommand) {
@@ -72,6 +79,42 @@ import TwitterKit
             }
         })
     }
+
+    // for Facebook
+    func loginWithFacebook(_ command: CDVInvokedUrlCommand) {
+//        self.callbackId = command.callbackId
+//        var data = ["name": nil, "screenName": nil, "userId": nil, "image": nil, "secret": nil, "token": nil] as [String: Any?]
+//
+//        FBSDKAccessToken.refreshCurrentAccessToken(nil)
+//        let loginManager = FBSDKLoginManager()
+//        loginManager.logIn(withReadPermissions: ["publicProfile", "email"],handler: { (result, error) -> Void in
+//            if (error != nil) {
+//
+//            }
+//            else {
+//
+//            }
+//        })
+        
+//        let loginHandler: FBSDKLoginManagerRequestTokenHandler = { (result, error) -> Void in
+//            if (error != nil) {
+//                // If the SDK has a message for the user, surface it.
+//                let errorMessage = "There was a problem logging you in."
+//                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: errorMessage)
+//                self.commandDelegate.send(result, callbackId:self.callbackId)
+//                return
+//            }
+//            else if (result.isCanceled) {
+//                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "User cancelled")
+//                self.commandDelegate.send(result, callbackId:self.callbackId)
+//            }
+//            else {
+//                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAsDictionary: self.fbResponseObject)
+//                self.commandDelegate.send(result, callbackId:self.callbackId)
+//            }
+//        }
+
+    }
     
     func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
         
@@ -97,4 +140,39 @@ import TwitterKit
             commandDelegate.send(result, callbackId:self.callbackId)
         }
     }
+
+
+//    func fbResponseObject() -> [: String] {
+//        if (!FBSDKAccessToken.currentAccessToken) {
+//            return ["status": "unknown"]
+//        }
+//
+//        var response : Dictionary = [:]
+//        var token = FBSDKAccessToken.currentAccessToken
+//        
+//        var expiresTimeInterval = token.expirationDate.timeIntervalSinceNow
+//        var expiresIn = "0"
+//
+//        if (expiresTimeInterval > 0) {
+//            expiresIn = NSString(format: "%0.0f", expiresTimeInterval)
+//        }
+//
+//        response["status"] = "connected"
+//        response["authResponse"] = {
+//            "accessToken": token.tokenString ? token.tokenString : "",
+//            "expiresIn": expiresIn,
+//            "secret": "...",
+//            "session_key" : true,
+//            "sig": "...",
+//            "userID" : token.userID ? token.userID : ""
+//        }
+//
+//        return response.copy()
+//    }
+//
 }
+
+
+
+
+

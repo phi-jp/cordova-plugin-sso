@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-sso" version="0.1">
   <name>Sso</name>
-  <js-module src="www/sso.js" >
+  <description>Single Sign On Plugin</description>
+	<engines>
+		<engine name="cordova-android" version=">3.9.9" />
+	</engines>
+  <js-module src="www/sso.js" name='Sso' >
     <clobbers target="sso" />
   </js-module>
 
@@ -11,7 +15,9 @@
   <preference name="TWITTER_KEY" default="" />
   <preference name="TWITTER_SECRET" default="" />
 
-  <!-- iOS -->
+  <preference name="FACEBOOK_APP_ID" default="" />
+
+  <!-- iOS -->E
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
       <feature name="Sso">
@@ -41,7 +47,10 @@
           <array>
             <string>$LINE_BUNDLE_ID</string>
             <string>twitterkit-$TWITTER_KEY</string>
+            <string>fb$FACEBOOK_APP_ID</string>
           </array>
+          <key>FacebookAppID</key>
+          <string>$FACEBOOK_APP_ID</string>
         </dict>
       </array>
     </config-file>
@@ -50,10 +59,16 @@
         <string>lineauth</string>
         <string>$LINE_BUNDLE_ID</string>
       </array>
-			<array>
-				<string>twitter</string>
-				<string>twitterauth</string>
-			</array>
+      <array>
+        <string>twitter</string>
+        <string>twitterauth</string>
+      </array>
+      <array>
+        <string>fbapi</string>
+        <string>fb-messenger-share-api</string>
+        <string>fbauth2</string>
+        <string>fbshareextension</string>
+      </array>
     </config-file>
 
     <source-file src="src/ios/AppDelegate+Sso.h" />
@@ -70,6 +85,11 @@
     <resource-file src="src/ios/twitter/TwitterKit.framework/TwitterKitResources.bundle" />
     <resource-file src="src/ios/twitter/TwitterKit.framework/TwitterShareExtensionUIResources.bundle" />
 
+    <framework src="src/ios/facebook/Bolts.framework" custom="true" />
+    <framework src="src/ios/facebook/FBSDKCoreKit.framework" custom="true" />
+    <framework src="src/ios/facebook/FBSDKLoginKit.framework" custom="true" />
+
+
     <dependency id="cordova-plugin-add-swift-support" version="1.7.1"/>
     <preference name="UseSwiftLanguageVersion" default="4" />
   </platform>
@@ -78,18 +98,31 @@
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="Sso">
-        <param name="android-package" value="plugin.line.Sso"/>
+        <param name="android-package" value="com.singlesignon.Sso"/>
       </feature>
     </config-file>
-    <source-file src="src/android/Sso.java" target-dir="src/plugin/line" />
-
-    <lib-file src="src/android/line-sdk-4.0.5.aar" />
-    
-    <config-file target="AndroidManifest.xml" parent="/*">
+    <!-- <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
+    </config-file> -->
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+    </config-file>
+    <config-file target="res/xml/config.xml" parent="widget">
+      <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
+      <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
+      <preference name='LineChannelId' value='$LINE_CHANNEL_ID'/>
     </config-file>
 
-    <framework src="src/android/line.gradle" custom="true" type="gradleReference" />
+    <source-file src="src/android/Sso.java" target-dir="src/com/singlesignon" />
+    <source-file src="src/android/twitter/UserShowServiceApi.java" target-dir="src/com/singlesignon" />
+
+
+    <framework src="src/android/twitter/twitter.gradle" custom="true" type="gradleReference" />
+
+    <lib-file src="src/android/line/line-sdk-4.0.5.aar" />
+    
+
+
+    <framework src="src/android/line/line.gradle" custom="true" type="gradleReference" />
     
   </platform>
 

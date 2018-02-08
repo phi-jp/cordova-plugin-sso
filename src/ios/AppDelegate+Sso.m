@@ -10,7 +10,8 @@
 #import <objc/runtime.h>
 #import <LineSDK/LineSDK.h>
 #import <TwitterKit/TwitterKit.h>
-
+//#import <FBSDKCoreKit/FBSDKCoreKit.h>
+//#import <FBSDKLoginKit/FBSDKLoginKit.h>
 @implementation AppDelegate (Sso)
 
 
@@ -21,6 +22,7 @@
     
     NSRange twitter = [url.absoluteString rangeOfString:@"twitterkit"];
     NSRange line = [url.absoluteString rangeOfString:@"line3rdp"];
+    BOOL fb = [url.absoluteString hasPrefix: @"fb"];
     
     if (twitter.location != NSNotFound) {
         return [[Twitter sharedInstance] application:app openURL:url options:options];
@@ -28,10 +30,20 @@
     else if (line.location != NSNotFound) {
         return [[LineSDKLogin sharedInstance] handleOpenURL:url];
     }
+//    else if (fb) {
+//        return [[FBSDKApplicationDelegate sharedInstance] application:app
+//            openURL:url
+//            sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
+//            annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+//    }
     else {
         // call super
         return [self application:app openURL:url options:options];
     }
 }
+
+//- (void) applicationDidBecomeActive:(NSNotification *) notification {
+//    [FBSDKAppEvents activateApp];
+//}
 
 @end
