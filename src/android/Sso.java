@@ -1,5 +1,10 @@
 package com.singlesignon;
 
+import com.linecorp.linesdk.LineApiResponseCode;
+import com.linecorp.linesdk.LineProfile;
+import com.linecorp.linesdk.auth.LineLoginApi;
+import com.linecorp.linesdk.auth.LineLoginResult;
+
 import com.twitter.sdk.android.core.*;
 import com.twitter.sdk.android.core.identity.TwitterAuthClient;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
@@ -30,12 +35,15 @@ public class Sso extends CordovaPlugin {
 
 	private static final String LOG_TAG = "Twitter Connect";
 	private String action;
+	private CallbackContext callbackContext;
 
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		TwitterConfig config = new TwitterConfig.Builder(cordova.getActivity().getApplicationContext())
     		.twitterAuthConfig(new TwitterAuthConfig(getTwitterKey(), getTwitterSecret()))
     		.build();
 		Twitter.initialize(config);
+
+
 	}
 
 	private String getTwitterKey() {
@@ -46,6 +54,9 @@ public class Sso extends CordovaPlugin {
 		return preferences.getString("TwitterConsumerSecret", "");
 	}
 
+	private String getLineChannelId() {
+		return preferences.getString("LineChannelId", "");
+	}
 	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		this.action = action;
 		final Activity activity = this.cordova.getActivity();
@@ -54,6 +65,11 @@ public class Sso extends CordovaPlugin {
 
 		if (action.equals("loginWithTwitter")) {
 			loginWithTwitter(activity, callbackContext);
+			return true;
+		}
+		else if (action.equals("loginWithLine")) {
+			this.callbackContext = callbackContext;
+			loginWithLine(activity, callbackContext);
 			return true;
 		}
 		return false;
@@ -105,6 +121,12 @@ public class Sso extends CordovaPlugin {
 		});
 	}
 
+	private void loginWithLine(final Activity activity, final CallbackContext callbackContext) {
+		Context context = this.cordova.getActivity().getApplicationContext();
+		Intent loginIntent = LineLoginApi.getLoginIntent(context, getLineChannelId());
+		this.cordova.startActivityForResult((CordovaPlugin) this, loginIntent, 0);
+	}
+
 	private void handleTwitterLoginResult(int requestCode, int resultCode, Intent intent) {
 		TwitterLoginButton twitterLoginButton = new TwitterLoginButton(cordova.getActivity());
 		twitterLoginButton.onActivityResult(requestCode, resultCode, intent);
@@ -115,6 +137,11 @@ public class Sso extends CordovaPlugin {
 		if (action.equals("loginWithTwitter")) {
 			handleTwitterLoginResult(requestCode, resultCode, intent);
 		}
+		else if (action.equals("loginWithLine")) {
+			LineLoginResult result = LineLoginApi.getLoginResultFromIntent(intent);
+			this.callbackContext.success(getLineBaseUserData(result));
+		}
+
 	}
 
 
@@ -146,6 +173,23 @@ public class Sso extends CordovaPlugin {
 		}
 		return jsonUser;
 	}
+
+	private JSONObject getLineBaseUserData(LineLoginResult result) {
+		JSONObject jsonUser = new JSONObject();
+		LineProfile profile = result.getLineProfile();
+
+		try {
+			jsonUser.put("name", profile.getDisplayName());
+			jsonUser.put("userId", profile.getUserId());
+			jsonUser.put("image", profile.getPictureUrl());
+			jsonUser.put("token", result.getLineCredential().getAccessToken().getAccessToken());
+		} catch(JSONException e) {
+			e.printStackTrace();
+		}
+		return jsonUser;
+	}
+
+
 
 	private JSONObject TweetObjectToJSON(Tweet tweet) {
 		Gson gson = new Gson();
