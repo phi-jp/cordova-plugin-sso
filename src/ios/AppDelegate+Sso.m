@@ -10,8 +10,8 @@
 #import <objc/runtime.h>
 #import <LineSDK/LineSDK.h>
 #import <TwitterKit/TwitterKit.h>
-//#import <FBSDKCoreKit/FBSDKCoreKit.h>
-//#import <FBSDKLoginKit/FBSDKLoginKit.h>
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+#import <FBSDKLoginKit/FBSDKLoginKit.h>
 @implementation AppDelegate (Sso)
 
 
@@ -30,20 +30,20 @@
     else if (line.location != NSNotFound) {
         return [[LineSDKLogin sharedInstance] handleOpenURL:url];
     }
-//    else if (fb) {
-//        return [[FBSDKApplicationDelegate sharedInstance] application:app
-//            openURL:url
-//            sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
-//            annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
-//    }
+    else if (fb) {
+        return [[FBSDKApplicationDelegate sharedInstance] application:app
+            openURL:url
+            sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
+            annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+    }
     else {
         // call super
         return [self application:app openURL:url options:options];
     }
 }
 
-//- (void) applicationDidBecomeActive:(NSNotification *) notification {
-//    [FBSDKAppEvents activateApp];
-//}
+- (void) applicationDidBecomeActive:(NSNotification *) notification {
+   [FBSDKAppEvents activateApp];
+}
 
 @end

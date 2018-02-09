@@ -16,6 +16,7 @@
   <preference name="TWITTER_SECRET" default="defaultValue" />
 
   <preference name="FACEBOOK_APP_ID" default="defaultValue" />
+  <preference name="FACEBOOK_APP_NAME" default="defaultValue" />
 
   <!-- iOS -->E
   <platform name="ios">
@@ -70,6 +71,14 @@
         <string>fbshareextension</string>
       </array>
     </config-file>
+    <config-file target="*-Info.plist" parent="FacebookAppID">
+        <string>$FACEBOOK_APP_ID</string>
+    </config-file>
+    <config-file target="*-Info.plist" parent="FacebookDisplayName">
+        <string>$FACEBOOK_APP_NAME</string>
+    </config-file>
+
+
 
     <source-file src="src/ios/AppDelegate+Sso.h" />
     <source-file src="src/ios/AppDelegate+Sso.m" />
@@ -101,9 +110,9 @@
         <param name="android-package" value="com.singlesignon.Sso"/>
       </feature>
     </config-file>
-    <!-- <config-file target="AndroidManifest.xml" parent="/*">
+    <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
-    </config-file> -->
+    </config-file>
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
     </config-file>
     <config-file target="res/xml/config.xml" parent="widget">

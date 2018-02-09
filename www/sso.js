@@ -12,6 +12,11 @@ var Sso = {
     login: function(onSuccess, onFail, param) {
       return exec(onSuccess, onFail, 'Sso', 'loginWithTwitter', [param]);
     } 
+  },
+  facebook: {
+    login: function(onSuccess, onFail, param) {
+      return exec(onSuccess, onFail, 'Sso', 'loginWithFacebook',[param]);
+    } 
   }
 
 };
