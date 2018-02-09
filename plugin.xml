@@ -18,7 +18,7 @@
   <preference name="FACEBOOK_APP_ID" default="defaultValue" />
   <preference name="FACEBOOK_APP_NAME" default="defaultValue" />
 
-  <!-- iOS -->E
+  <!-- iOS -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
       <feature name="Sso">
