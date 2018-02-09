@@ -43,7 +43,7 @@
 }
 
 - (void) applicationDidBecomeActive:(NSNotification *) notification {
-   [FBSDKAppEvents activateApp];
+    [FBSDKAppEvents activateApp];
 }
 
 @end
