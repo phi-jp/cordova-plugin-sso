@@ -38,8 +38,7 @@ import FBSDKLoginKit
         self.callbackId = command.callbackId
         Twitter.sharedInstance().logIn(completion: { (session, error) in
             if (session != nil) {
-                var data = ["name": nil, "screenName": nil, "userId": nil, "image": nil, "secret": nil, "token": nil] as [String: Any?]
-                
+
                 let client = TWTRAPIClient(userID: session?.userID)
                 client.loadUser(withID: (session?.userID)!) { (user, error) -> Void in
                     if (error != nil) {
@@ -47,32 +46,11 @@ import FBSDKLoginKit
                         self.commandDelegate.send(result, callbackId:self.callbackId)
                     }
                     else {
-
-                        if let name = user?.name {
-                            data.updateValue(name, forKey: "name")
-                        }
-                        if let screenName = user?.screenName {
-                            data.updateValue(screenName, forKey: "screenName")
-                        }
-                        if let userID = user?.userID {
-                            data.updateValue(userID, forKey: "userId")
-                        }
-                        if let image = user?.profileImageURL {
-                            data.updateValue(image, forKey: "image")
-                        }
-                        if let secret = session?.authTokenSecret {
-                            data.updateValue(secret, forKey: "secret")
-                        }
-                        if let token = session?.authToken {
-                            data.updateValue(token, forKey: "token")
-                        }
                         
-                        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: data)
+                        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: self.twResponseObject(session, user))
                         self.commandDelegate.send(result, callbackId:self.callbackId)
                     }
-                    
                 }
-        
             } else {
                 let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.debugDescription)
                 self.commandDelegate.send(result, callbackId:self.callbackId)
@@ -87,27 +65,15 @@ import FBSDKLoginKit
         FBSDKLoginManager().logIn(withReadPermissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
     }
     
+    
+    
     func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
         
         if error != nil {
             let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.debugDescription)
             commandDelegate.send(result, callbackId:self.callbackId)
         } else {
-            var data = ["userId":nil, "name": nil, "image":nil, "token":nil] as [String : Any?]
-            if let displayName = profile?.displayName {
-                data.updateValue(displayName, forKey: "name")
-            }
-            if let userID = profile?.userID {
-                data.updateValue(userID, forKey: "userId")
-            }
-            if let pictureURL = profile?.pictureURL {
-                data.updateValue(String(describing: pictureURL), forKey: "image")
-            }
-            if let _acessToken = credential?.accessToken?.accessToken as? String {
-                data.updateValue(_acessToken, forKey: "token")
-            }
-
-            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:data)
+            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:self.lineResponseObject(credential, profile))
             commandDelegate.send(result, callbackId:self.callbackId)
         }
     }
@@ -140,6 +106,47 @@ import FBSDKLoginKit
             }
         }
         return loginHandler
+    }
+    
+    private func twResponseObject(_ session:TWTRSession? , _ user:TWTRUser? ) -> Dictionary<String, Any> {
+        var data = ["name": nil, "screenName": nil, "userId": nil, "image": nil, "secret": nil, "token": nil] as [String: Any?]
+        if let name = user?.name {
+            data.updateValue(name, forKey: "name")
+        }
+        if let screenName = user?.screenName {
+            data.updateValue(screenName, forKey: "screenName")
+        }
+        if let userID = user?.userID {
+            data.updateValue(userID, forKey: "userId")
+        }
+        if let image = user?.profileImageURL {
+            data.updateValue(image, forKey: "image")
+        }
+        if let secret = session?.authTokenSecret {
+            data.updateValue(secret, forKey: "secret")
+        }
+        if let token = session?.authToken {
+            data.updateValue(token, forKey: "token")
+        }
+        return data
+    }
+    
+    private func lineResponseObject(_ credential: LineSDKCredential?, _ profile: LineSDKProfile?) -> Dictionary<String, Any> {
+        var data = ["userId":nil, "name": nil, "image":nil, "token":nil] as [String : Any?]
+        if let displayName = profile?.displayName {
+            data.updateValue(displayName, forKey: "name")
+        }
+        if let userID = profile?.userID {
+            data.updateValue(userID, forKey: "userId")
+        }
+        if let pictureURL = profile?.pictureURL {
+            data.updateValue(String(describing: pictureURL), forKey: "image")
+        }
+        if let _acessToken = credential?.accessToken?.accessToken as? String {
+            data.updateValue(_acessToken, forKey: "token")
+        }
+
+        return data
     }
     
     private func fbResponseObject() -> Dictionary<String, Any> {
@@ -222,8 +229,3 @@ import FBSDKLoginKit
         return topController
     }
 }
-
-
-
-
-
