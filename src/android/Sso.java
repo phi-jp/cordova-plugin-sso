@@ -191,12 +191,12 @@ public class Sso extends CordovaPlugin {
 
 					@Override
 					public void onCancel() {
-
+						callbackContext.error("User cancelled");
 					}
 
 					@Override
 					public void onError(FacebookException error) {
-
+						callbackContext.error("Failed login session");
 					}
 				});
 			}
