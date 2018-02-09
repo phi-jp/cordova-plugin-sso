@@ -3,15 +3,15 @@
 
 ## What ?
 
-If you use this plugin, You are available for realizing sso (single sign on) at Twitter, Facebook and LINE
+If you use this plugin, you can be available for realizing SSO (Single Sign On) at Twitter, Facebook and LINE
 
 ## Install
 
 ```
-$ cordova plguin add cordova-plugin-sso 
+$ cordova plguin add cordova-plugin-sso
 ```
 
-OR 
+And add config.xml below code
 
 ```xml
 <plugin name="cordova-plugin-sso" spec="0.0.7">
@@ -25,7 +25,7 @@ OR
 
 ```
 
-## Settings 
+## Service Settings 
 
 ### LINE
 
