@@ -108,13 +108,34 @@
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="Sso">
         <param name="android-package" value="com.singlesignon.Sso"/>
+        <param name="onload" value="true" />
       </feature>
+      <access origin="https://m.facebook.com" />
+      <access origin="https://graph.facebook.com" />
+      <access origin="https://api.facebook.com" />
+      <access origin="https://*.fbcdn.net" />
+      <access origin="https://*.akamaihd.net" />
+      <preference name="android-minSdkVersion" value="15" />
     </config-file>
+
+    <source-file src="src/android/facebook/facebooksettings.xml" target-dir="res/values" />
+    <config-file target="res/values/facebooksettings.xml" parent="/*">
+        <string name="fb_app_id">$FACEBOOK_APP_ID</string>
+        <string name="fb_app_name">$FACEBOOK_APP_NAME</string>
+    </config-file>
+
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
     </config-file>
+
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
+      <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id"/>
+      <meta-data android:name="com.facebook.sdk.ApplicationName" android:value="@string/fb_app_name" />
+      <activity android:name="com.facebook.FacebookActivity"
+        android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+        android:label="@string/fb_app_name" />
     </config-file>
+
     <config-file target="res/xml/config.xml" parent="widget">
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
@@ -122,11 +143,10 @@
     </config-file>
 
     <source-file src="src/android/Sso.java" target-dir="src/com/singlesignon" />
-    <source-file src="src/android/twitter/UserShowServiceApi.java" target-dir="src/com/singlesignon" />
 
-
+    <framework src="com.facebook.android:facebook-android-sdk:4.+"/>
     <framework src="src/android/twitter/twitter.gradle" custom="true" type="gradleReference" />
-
+    <source-file src="src/android/twitter/UserShowServiceApi.java" target-dir="src/com/singlesignon" />
     <lib-file src="src/android/line/line-sdk-4.0.5.aar" />
     
 
