@@ -180,11 +180,9 @@ import FBSDKLoginKit
         
         
         var profileError:Error?
-        let semaphore = DispatchSemaphore(value: 0)
         let queue = DispatchQueue.global()
         queue.sync {
             FBSDKProfile.loadCurrentProfile { (profile, error) in
-                
                 if (error != nil) {
                     profileError = error
                 }
@@ -203,14 +201,10 @@ import FBSDKLoginKit
                         let image:String? = profile?.imageURL(for: FBSDKProfilePictureMode.square, size: CGSize(width: 320, height: 320)).absoluteString
                         responseAuth.updateValue(image as Any, forKey: "image")
                     }
-                    
                 }
-                
-                semaphore.signal()
             }
         }
         
-        semaphore.wait()
 
         if (profileError != nil) {
             return [ "status": "unknown" ]
