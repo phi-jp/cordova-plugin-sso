@@ -178,33 +178,36 @@ import FBSDKLoginKit
             "userId" : token?.userID as Any,
         ]
         
-        
+        var keepAlive = true
+        let runRoop = RunLoop.current
         var profileError:Error?
-        let queue = DispatchQueue.global()
-        queue.sync {
-            FBSDKProfile.loadCurrentProfile { (profile, error) in
-                if (error != nil) {
-                    profileError = error
+    
+        FBSDKProfile.loadCurrentProfile { (profile, error) in
+            if (error != nil) {
+                profileError = error
+            }
+            else {
+                if let firstname = profile?.firstName, let lastname = profile?.lastName {
+                    let name = firstname + lastname
+                    responseAuth.updateValue(name, forKey: "name")
                 }
-                else {
-                    if let firstname = profile?.firstName, let lastname = profile?.lastName {
-                        let name = firstname + lastname
-                        responseAuth.updateValue(name, forKey: "name")
-                    }
-                    if let firstname = profile?.firstName {
-                        responseAuth.updateValue(firstname, forKey: "first_name")
-                    }
-                    if let lastName = profile?.lastName {
-                        responseAuth.updateValue(lastName, forKey: "last_name")
-                    }
-                    if (profile != nil) {
-                        let image:String? = profile?.imageURL(for: FBSDKProfilePictureMode.square, size: CGSize(width: 320, height: 320)).absoluteString
-                        responseAuth.updateValue(image as Any, forKey: "image")
-                    }
+                if let firstname = profile?.firstName {
+                    responseAuth.updateValue(firstname, forKey: "first_name")
+                }
+                if let lastName = profile?.lastName {
+                    responseAuth.updateValue(lastName, forKey: "last_name")
+                }
+                if (profile != nil) {
+                    let image:String? = profile?.imageURL(for: FBSDKProfilePictureMode.square, size: CGSize(width: 320, height: 320)).absoluteString
+                    responseAuth.updateValue(image as Any, forKey: "image")
                 }
             }
+            keepAlive = false
         }
-        
+
+        while keepAlive && runRoop.run(mode: .defaultRunLoopMode, before: NSDate(timeIntervalSinceNow: 0.1) as Date) {
+            //wait...
+        }
 
         if (profileError != nil) {
             return [ "status": "unknown" ]
