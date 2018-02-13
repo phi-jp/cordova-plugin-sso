@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-sso",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "cordova-plugin-sso",
   "cordova" : {
     "id": "cordova-plugin-sso",
