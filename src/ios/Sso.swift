@@ -7,6 +7,7 @@ import FBSDKLoginKit
 @objc(Sso) class Sso : CDVPlugin, LineSDKLoginDelegate {
     
     var callbackId:String?
+    var lineSDKApi: LineSDKAPI?
     
     // init
     override func pluginInitialize() {
@@ -66,6 +67,53 @@ import FBSDKLoginKit
     }
     
     
+    // Logout
+    // If you have been logined once, the accessToken was saved in the device.
+    // So if you try to refresh profile, you have to execute 'logout' method.
+
+    // for Line
+    func logoutWithLine(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId
+        lineSDKApi?.logout(queue: .main, completion:{ success, error in
+            if (error != nil) {
+                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs:"error")
+                self.commandDelegate.send(result, callbackId:self.callbackId)
+            }
+            else {
+                let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
+                self.commandDelegate.send(result, callbackId:self.callbackId)
+            }
+        })
+    }
+
+    // for Twitter
+    func logoutWithTwitter(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId
+        let store = Twitter.sharedInstance().sessionStore
+
+        if let userID = store.session()?.userID {
+            store.logOutUserID(userID)
+        }
+
+        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
+        self.commandDelegate.send(result, callbackId:self.callbackId)
+
+    }
+
+    // for Facebook
+    func logoutWithFacebook(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId
+        if (FBSDKAccessToken.current() != nil) {
+            let loginManger:FBSDKLoginManager = FBSDKLoginManager();
+            loginManger.logOut();
+        }
+
+        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
+        self.commandDelegate.send(result, callbackId:self.callbackId)
+    }
+
+    
+
     
     func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
         
@@ -75,6 +123,9 @@ import FBSDKLoginKit
         } else {
             let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:self.lineResponseObject(credential, profile))
             commandDelegate.send(result, callbackId:self.callbackId)
+            
+            self.lineSDKApi = LineSDKAPI.init(configuration: LineSDKConfiguration.defaultConfig())
+            
         }
     }
     

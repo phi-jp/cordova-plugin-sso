@@ -7,16 +7,25 @@ var Sso = {
     login: function(onSuccess, onFail, param) {
       return exec(onSuccess, onFail, 'Sso', 'loginWithLine', [param]);
     },
+    logout: function(onSuccess, onFail, param) {
+      return exec(onSuccess, onFail, 'Sso', 'logoutWithLine', [param]);
+    },
   },
   twitter: {
     login: function(onSuccess, onFail, param) {
       return exec(onSuccess, onFail, 'Sso', 'loginWithTwitter', [param]);
-    } 
+    },
+    logout: function(onSuccess, onFail, param) {
+      return exec(onSuccess, onFail, 'Sso', 'logoutWithTwitter', [param]);
+    }, 
   },
   facebook: {
     login: function(onSuccess, onFail, param) {
       return exec(onSuccess, onFail, 'Sso', 'loginWithFacebook',[param]);
-    } 
+    },
+    logout: function(onSuccess, onFail, param) {
+      return exec(onSuccess, onFail, 'Sso', 'logoutWithFacebook', [param]);
+    },
   }
 
 };
