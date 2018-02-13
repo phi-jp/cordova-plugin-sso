@@ -48,7 +48,7 @@ $ keytool -exportcert -alias androiddebugkey -keystore .keystore | openssl sha1 
 - Line
 - Facebook
 
-### Code
+### Login
 
 ```javascript
 if (window.sso) {
@@ -81,3 +81,20 @@ Every service has below parameters
 
 Optional parameters below
 
+### Logout
+
+If you have been logined once, the accessToken was saved in the device.
+So if you want to get the Token, profile, or etc.. from the beginning, you have to execute 'logout' method.
+
+
+```javascript
+if (window.sso) {
+  sso.twitter.logout(function(message) {
+    // success
+    console.log(message) // -> display logout
+  }, function(error) {
+    // error
+    console.log(error);
+  });
+}
+```
