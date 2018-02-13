@@ -2,12 +2,15 @@ package com.singlesignon;
 
 import com.linecorp.linesdk.LineApiResponseCode;
 import com.linecorp.linesdk.LineProfile;
+import com.linecorp.linesdk.api.LineApiClient;
+import com.linecorp.linesdk.api.LineApiClientBuilder;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
 
 import com.twitter.sdk.android.core.*;
 import com.twitter.sdk.android.core.identity.TwitterAuthClient;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+import com.twitter.sdk.android.core.internal.TwitterApi;
 import com.twitter.sdk.android.core.models.*;
 import com.twitter.sdk.android.core.services.*;
 
@@ -72,6 +75,7 @@ public class Sso extends CordovaPlugin {
 	private String action;
 	private CallbackContext callbackContext;
 	private CallbackManager fbCallbackManager;
+	private LineApiClient lineApiClient;
 
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		TwitterConfig config = new TwitterConfig.Builder(cordova.getActivity().getApplicationContext())
@@ -101,6 +105,21 @@ public class Sso extends CordovaPlugin {
 			loginWithFacebook(activity, callbackContext);
 			return true;
 		}
+		else if (action.equals("logoutWithTwitter")) {
+			cordova.setActivityResultCallback(this);
+			logoutWithTwitter(activity, callbackContext);
+			return true;
+		}
+		else if (action.equals("logoutWithLine")) {
+			cordova.setActivityResultCallback(this);
+			logoutWithLine(activity, callbackContext);
+			return true;
+		}
+		else if (action.equals("logoutWithFacebook")) {
+			cordova.setActivityResultCallback(this);
+			logoutWithFacebook(activity, callbackContext);
+			return true;
+		}
 		else {
 			return false;
 		}
@@ -114,7 +133,13 @@ public class Sso extends CordovaPlugin {
 		}
 		else if (action.equals("loginWithLine")) {
 			LineLoginResult result = LineLoginApi.getLoginResultFromIntent(intent);
-			callbackContext.success(getLineBaseUserData(result));
+			if (result.isSuccess()) {
+				callbackContext.success(getLineBaseUserData(result));
+			}
+			else {
+				callbackContext.error("error");
+			}
+
 		}
 		else if (action.equals("loginWithFacebook")) {
 			fbCallbackManager.onActivityResult(requestCode, resultCode, intent);
@@ -171,6 +196,8 @@ public class Sso extends CordovaPlugin {
 	private void loginWithLine(final Activity activity, final CallbackContext callbackContext) {
 		Context context = this.cordova.getActivity().getApplicationContext();
 		Intent loginIntent = LineLoginApi.getLoginIntent(context, getLineChannelId());
+		LineApiClientBuilder apiClientBuilder = new LineApiClientBuilder(context, getLineChannelId());
+		lineApiClient = apiClientBuilder.build();
 		this.cordova.startActivityForResult((CordovaPlugin) this, loginIntent, 0);
 	}
 
@@ -203,6 +230,38 @@ public class Sso extends CordovaPlugin {
 		});
 	}
 
+
+	private void logoutWithTwitter(final Activity activity, final CallbackContext callbackContext) {
+		cordova.getThreadPool().execute(new Runnable() {
+			@Override
+			public void run() {
+				TwitterCore twitterCore = TwitterCore.getInstance();
+				long id = twitterCore.getSessionManager().getActiveSession().getId();
+				twitterCore.getSessionManager().clearSession(id);
+				callbackContext.success("logout");
+			}
+		});
+	}
+
+	private void logoutWithLine(final Activity activity, final CallbackContext callbackContext) {
+		if (lineApiClient != null) {
+			lineApiClient.logout();
+			callbackContext.success("logout");
+		}
+		else {
+			callbackContext.error("error");
+		}
+
+	}
+
+	private void logoutWithFacebook(final Activity activity, final CallbackContext callbackContext) {
+		if (fbHasAccessToken()) {
+			LoginManager.getInstance().logOut();
+			callbackContext.success("logout");
+		} else {
+			callbackContext.error("error");
+		}
+	}
 	private String getTwitterKey() {
 		return preferences.getString("TwitterConsumerKey", "");
 	}
@@ -297,6 +356,11 @@ public class Sso extends CordovaPlugin {
 	private void handleTwitterLoginResult(int requestCode, int resultCode, Intent intent) {
 		TwitterLoginButton twitterLoginButton = new TwitterLoginButton(cordova.getActivity());
 		twitterLoginButton.onActivityResult(requestCode, resultCode, intent);
+	}
+
+
+	private boolean fbHasAccessToken() {
+		return AccessToken.getCurrentAccessToken() != null;
 	}
 
 }
