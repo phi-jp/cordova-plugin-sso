@@ -14,7 +14,7 @@ $ cordova plguin add cordova-plugin-sso
 And add config.xml below code
 
 ```xml
-<plugin name="cordova-plugin-sso" spec="0.0.7">
+<plugin name="cordova-plugin-sso" spec="0.0.9">
     <variable name="LINE_BUNDLE_ID" value="line3rdp.[YOUR BUNDLE ID]" />
     <variable name="LINE_CHANNEL_ID" value=[LINE_CHANNLE_ID] />
     <variable name="TWITTER_KEY" value=[Twitter Consumer Key] />
