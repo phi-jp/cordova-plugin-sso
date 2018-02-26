@@ -31,7 +31,15 @@ import FBSDKLoginKit
     // for LINE
     func loginWithLine(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        LineSDKLogin.sharedInstance().start()
+        
+        let lineSDKLogin = LineSDKLogin.sharedInstance()
+        
+        if (lineSDKLogin.canLoginWithLineApp()) {
+            lineSDKLogin.start()
+        }
+        else {
+            lineSDKLogin.startWebLogin(withSafariViewController: true)
+        }
     }
     
     // for Twitter
