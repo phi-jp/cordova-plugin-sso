@@ -26,6 +26,14 @@ var Sso = {
     logout: function(onSuccess, onFail, param) {
       return exec(onSuccess, onFail, 'Sso', 'logoutWithFacebook', [param]);
     },
+  },
+  google: {
+    login: function(onSuccess, onFail, param) {
+      return exec(onSuccess, onFail, 'Sso', 'loginWithGoogle',[param]);
+    },
+    logout: function(onSuccess, onFail, param) {
+      return exec(onSuccess, onFail, 'Sso', 'logoutWithGoogle',[param]);
+    },
   }
 
 };

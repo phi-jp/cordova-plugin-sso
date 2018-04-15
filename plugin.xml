@@ -18,6 +18,9 @@
   <preference name="FACEBOOK_APP_ID" default="defaultValue" />
   <preference name="FACEBOOK_APP_NAME" default="defaultValue" />
 
+  <preference name="GOOGLE_CLIENT_ID" default="defaultValue" />
+  <preference name="GOOGLE_REVERSED_CLIENT_ID" default="defaultValue" />
+
   <!-- iOS -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
@@ -30,6 +33,7 @@
     <config-file target="config.xml" parent="widget">
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
+      <preference name="GoogleClientID" value="$GOOGLE_CLIENT_ID" />
       <preference name="deployment-target" value="7.0" />
     </config-file>
 
@@ -49,6 +53,7 @@
             <string>$LINE_BUNDLE_ID</string>
             <string>twitterkit-$TWITTER_KEY</string>
             <string>fb$FACEBOOK_APP_ID</string>
+            <string>$GOOGLE_REVERSED_CLIENT_ID</string>
           </array>
           <key>FacebookAppID</key>
           <string>$FACEBOOK_APP_ID</string>
@@ -78,16 +83,13 @@
         <string>$FACEBOOK_APP_NAME</string>
     </config-file>
 
-
-
     <source-file src="src/ios/AppDelegate+Sso.h" />
     <source-file src="src/ios/AppDelegate+Sso.m" />
     <source-file src="src/ios/sso.swift" />
     <source-file src="src/ios/Sso-Bridging-Header.h" />
 
     <framework src="src/ios/line/LineSDK.framework" custom="true" />
-    <framework src="Security.framework" />
-    <framework src="CoreTelephony.framework" />
+
 
     <framework src="src/ios/twitter/TwitterKit.framework" custom="true" />
     <framework src="src/ios/twitter/TwitterCore.framework" custom="true" />
@@ -97,6 +99,22 @@
     <framework src="src/ios/facebook/Bolts.framework" custom="true" />
     <framework src="src/ios/facebook/FBSDKCoreKit.framework" custom="true" />
     <framework src="src/ios/facebook/FBSDKLoginKit.framework" custom="true" />
+
+    <!-- Google login  -->
+    <framework src="src/ios/google/GoogleSignIn.bundle" custom="true" />
+    <framework src="src/ios/google/GoogleSignIn.framework" custom="true" />
+    <framework src="src/ios/google/GoogleSignInDependencies.framework" custom="true" />
+
+    <!-- System Framework -->
+    <framework src="AddressBook.framework" weak="true" />
+    <framework src="CoreText.framework" weak="true" />
+    <framework src="SafariServices.framework" weak="true" />
+    <framework src="Security.framework" weak="true" />
+    <framework src="SystemConfiguration.framework" weak="true" />
+    <framework src="CoreTelephony.framework" />
+    <framework src="libz.tbd" weak="true" />
+    <framework src="libz.dylib" weak="true" />
+
 
 
     <dependency id="cordova-plugin-add-swift-support" version="1.7.1"/>

@@ -6,7 +6,7 @@
 //
 //
 
-#import "AppDelegate.h"
-
-@interface AppDelegate (Sso)
+@import GoogleSignIn;
+@interface AppDelegate : UIResponder <UIApplicationDelegate, GIDSignInDelegate>
 @end
+

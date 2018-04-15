@@ -12,8 +12,9 @@
 #import <TwitterKit/TwitterKit.h>
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
-@implementation AppDelegate (Sso)
+#import <GoogleSignIn/GoogleSignIn.h>
 
+@implementation AppDelegate(Sso)
 
 - (BOOL)application: (UIApplication *)app
                               openURL: (NSURL *)url
@@ -22,6 +23,7 @@
     
     NSRange twitter = [url.absoluteString rangeOfString:@"twitterkit"];
     NSRange line = [url.absoluteString rangeOfString:@"line3rdp"];
+    NSRange google = [url.absoluteString rangeOfString:@"com.googleusercontent"];
     BOOL fb = [url.absoluteString hasPrefix: @"fb"];
     
     if (twitter.location != NSNotFound) {
@@ -33,6 +35,11 @@
     else if (fb) {
         return [[FBSDKApplicationDelegate sharedInstance] application:app
             openURL:url
+            sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
+            annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+    }
+    else if (google.location != NSNotFound) {
+        return [[GIDSignIn sharedInstance] handleURL:url
             sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
             annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
     }
