@@ -46,13 +46,13 @@ $ keytool -exportcert -alias androiddebugkey -keystore .keystore | openssl sha1 
 
 #### for iOS
 
-To get client id & reversed client id, you have to registration google firebase console.
+To get client id & reversed client id, you have to register your project to Google firebase console.
 
 https://developers.google.com/identity/sign-in/ios/sdk/
 
 As regster your appliction, you get GoogleService-Info.plist.
 
-You can see on the test edit when click the GoogleService-info.plist.
+You can see client id & reversed client id on the text editor.
 
 
 #### for Android
