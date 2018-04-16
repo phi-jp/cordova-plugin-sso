@@ -133,10 +133,12 @@
       <access origin="https://api.facebook.com" />
       <access origin="https://*.fbcdn.net" />
       <access origin="https://*.akamaihd.net" />
+      <access origin="https://accounts.google.com/*" />
       <preference name="android-minSdkVersion" value="15" />
     </config-file>
 
     <source-file src="src/android/facebook/facebooksettings.xml" target-dir="res/values" />
+    
     <config-file target="res/values/facebooksettings.xml" parent="/*">
         <string name="fb_app_id">$FACEBOOK_APP_ID</string>
         <string name="fb_app_name">$FACEBOOK_APP_NAME</string>
@@ -144,6 +146,11 @@
 
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+      <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -166,6 +173,9 @@
     <framework src="src/android/twitter/twitter.gradle" custom="true" type="gradleReference" />
     <source-file src="src/android/twitter/UserShowServiceApi.java" target-dir="src/com/singlesignon" />
     <lib-file src="src/android/line/line-sdk-4.0.5.aar" />
+    <!--google-->
+    <framework src="com.google.android.gms:play-services-auth:11.8.0" />
+    <framework src="com.google.android.gms:play-services-identity:11.8.0" />
     
 
 
