@@ -44,21 +44,41 @@ $ keytool -exportcert -alias androiddebugkey -keystore .keystore | openssl sha1 
 
 ### Google
 
-get client id
-
 #### for iOS
+
+To get client id & reversed client id, you have to registration google firebase console.
+
 https://developers.google.com/identity/sign-in/ios/sdk/
+
+As regster your appliction, you get GoogleService-Info.plist.
+
+You can see on the test edit when click the GoogleService-info.plist.
 
 
 #### for Android
 
+https://developers.google.com/mobile/add?platform=android&cntapi=signin
+
+When you regster your appliction, you have to set the SHA1 fingerprint.
+
+`keytool -exportcert -keystore <path-to-debug-or-production-keystore> -list -v -alias <alias-name>`
+
+If your project is only debug, only you have to do is entering below code on the console.
+
+`keytool -exportcert -keystore ~/.android/debug.keystore -list -v`
+
+
+
 ## Usage
+
+
 
 ### Available Service
 
 - Twitter
 - Line
 - Facebook
+- Google
 
 ### Login
 
