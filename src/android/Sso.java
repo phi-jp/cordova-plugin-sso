@@ -114,15 +114,16 @@ public class Sso extends CordovaPlugin {
 	private CallbackContext callbackContext;
 	private CallbackManager fbCallbackManager;
 	private LineApiClient lineApiClient;
+
+	// for Google login API
 	private GoogleSignInClient mGoogleSignInClient;
 
+	//constant variable for Google login
 	private final static String FIELD_GOOGLE_ACCESS_TOKEN      = "accessToken";
 	private final static String FIELD_GOOGLE_TOKEN_EXPIRES     = "expires";
 	private final static String FIELD_GOOGLE_TOKEN_EXPIRES_IN  = "expires_in";
 	private final static String VERIFY_GOOGLE_TOKEN_URL        = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=";
-
 	public static final int RC_GOOGLEPLUS = 77552;
-
 	public static final int KAssumeStaleTokenSec = 60;
 
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -130,14 +131,14 @@ public class Sso extends CordovaPlugin {
     		.twitterAuthConfig(new TwitterAuthConfig(getTwitterKey(), getTwitterSecret()))
     		.build();
 		Twitter.initialize(config);
-
-
 	}
 
 	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		this.action = action;
 		final Activity activity = this.cordova.getActivity();
 		final Context context = activity.getApplicationContext();
+		final JSONObject options = args.optJSONObject(0);
+
 		this.callbackContext = callbackContext;
 
 		if (action.equals("loginWithTwitter")) {
@@ -160,6 +161,21 @@ public class Sso extends CordovaPlugin {
 			// for Google signin
 			GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
 			mGoogleSignInClient = GoogleSignIn.getClient(activity, gso);
+
+			// for scopes
+			String scopes = options.optString("scope", null);
+			if (scope != null && !scopes.isEmpty()) {
+				for (String scope : scopes.split(" ") ) {
+					gso.requestScopes(new Scope(scope));
+				}
+			}
+
+			// for server client id (id token) 
+			String serverClientId = options.optString("serverClientId");
+			if (serverClientId != null && !serverClientId.isEmpty()) {
+				gso.requestIdToken(serverClientId);
+			}
+
 			Intent loginIntent = mGoogleSignInClient.getSignInIntent();
 			this.cordova.getActivity().startActivityForResult(loginIntent, RC_GOOGLEPLUS);
 			return true;
@@ -345,10 +361,7 @@ public class Sso extends CordovaPlugin {
 				callbackContext.success("logout");
 			}
 		});
-
-
 	}
-
 
 	private void handleGoogleSignInResult(final GoogleSignInResult result) {
 		if (mGoogleSignInClient == null) {
