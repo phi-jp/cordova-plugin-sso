@@ -88,6 +88,19 @@ import GoogleSignIn
     // for Google
     func loginWithGoogle(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
+        
+        let opts = command.argument(at: 0)! as! Dictionary<String, Any>
+        
+        // scope
+        if let scopes:String = opts["scope"]! as? String {
+            googleSignin?.scopes = [scopes]
+        }
+        
+        // server client id
+        if let serverClientId:String = opts["serverClientId"]! as? String {
+            googleSignin?.serverClientID = serverClientId
+        }
+        
         googleSignin?.signIn()
     }
     
