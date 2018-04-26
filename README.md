@@ -21,6 +21,8 @@ And add config.xml below code
     <variable name="TWITTER_SECRET" value=[Twitter Consumer Secret] />
     <variable name="FACEBOOK_APP_ID" value=[Facebook app id] />
     <variable name="FACEBOOK_APP_NAME" value=[Facebook app name] />
+    <variable name="GOOGLE_CLIENT_ID" value=[Google client id] />
+    <variable name="GOOGLE_REVERSED_CLIENT_ID" value=[Google reversed client id] />
 </plugin>
 
 ```
@@ -40,13 +42,43 @@ $ keytool -exportcert -alias androiddebugkey -keystore .keystore | openssl sha1 
 ### Facebook
 
 
+### Google
+
+#### for iOS
+
+To get client id & reversed client id, you have to register your project to Google firebase console.
+
+https://developers.google.com/identity/sign-in/ios/sdk/
+
+As regster your appliction, you get GoogleService-Info.plist.
+
+You can see client id & reversed client id on the text editor.
+
+
+#### for Android
+
+https://developers.google.com/mobile/add?platform=android&cntapi=signin
+
+When you regster your appliction, you have to set the SHA1 fingerprint.
+
+`keytool -exportcert -keystore <path-to-debug-or-production-keystore> -list -v -alias <alias-name>`
+
+If your project is only debug, only you have to do is entering below code on the console.
+
+`keytool -exportcert -keystore ~/.android/debug.keystore -list -v`
+
+
+
 ## Usage
+
+
 
 ### Available Service
 
 - Twitter
 - Line
 - Facebook
+- Google
 
 ### Login
 
@@ -58,7 +90,7 @@ if (window.sso) {
       name: result.name,
       id: result.userId,
       token: result.token,
-      picture: result.image
+      image: result.image
     };
 
   }, function(error) {
