@@ -255,6 +255,7 @@ import GoogleSignIn
         if let token = session?.authToken {
             data.updateValue(token, forKey: "token")
         }
+        
         return data
     }
     
@@ -347,12 +348,30 @@ import GoogleSignIn
     }
     
     private func googleResponseObject(didSignInFor user: GIDGoogleUser!)-> Dictionary<String, Any> {
-        var data = ["name": nil, "first_name": nil, "last_name": nil, "token": nil ,"userId": nil, "image": nil, "email": nil] as [String: Any?]
+        var data = ["name": nil, "first_name": nil, "last_name": nil, "token": nil, "tokenExpiredAt": nil, "idToken": nil, "idTokenExpiredAt": nil, "userId": nil, "image": nil, "email": nil] as [String: Any?]
+        
+        if (user == nil) {
+            return data
+        }
+        
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
+        
         if let userId = user.userID {
             data.updateValue(userId, forKey: "userId")
         }
+        if let accessToken = user.authentication.accessToken {
+            data.updateValue(accessToken, forKey: "token")
+            data.updateValue(user.authentication.refreshToken, forKey: "refreshToken")
+            let date = dateFormatter.string(from: user.authentication.accessTokenExpirationDate)
+            data.updateValue(date, forKey: "tokenExpiredAt")
+        }
         if let idToken = user.authentication.idToken {
-            data.updateValue(idToken, forKey: "token")
+            data.updateValue(idToken, forKey: "idToken")
+            data.updateValue(user.authentication.refreshToken, forKey: "refreshToken")
+            let date = dateFormatter.string(from: user.authentication.idTokenExpirationDate)
+            data.updateValue(date, forKey: "idTokenExpiredAt")
         }
         if let fullName = user.profile.name {
             data.updateValue(fullName, forKey: "name")
@@ -369,6 +388,7 @@ import GoogleSignIn
         if let image = user.profile.imageURL(withDimension: 512) {
             data.updateValue(image.absoluteString, forKey: "image")
         }
+        
         
         return data
     }
