@@ -351,7 +351,7 @@ import GoogleSignIn
     }
     
     private func googleResponseObject(didSignInFor user: GIDGoogleUser!)-> Dictionary<String, Any> {
-        var data = ["name": nil, "first_name": nil, "last_name": nil, "token": nil, "tokenExpiredAt": nil, "idToken": nil, "idTokenExpiredAt": nil, "userId": nil, "image": nil, "email": nil] as [String: Any?]
+        var data = ["name": nil, "first_name": nil, "last_name": nil, "token": nil, "tokenExpiredAt": nil, "idToken": nil, "auth_code": nil, "idTokenExpiredAt": nil, "userId": nil, "image": nil, "email": nil] as [String: Any?]
         
         if (user == nil) {
             return data
@@ -390,6 +390,9 @@ import GoogleSignIn
         }
         if let image = user.profile.imageURL(withDimension: 512) {
             data.updateValue(image.absoluteString, forKey: "image")
+        }
+        if let serverAuthCode = user.serverAuthCode {
+            data.updateValue(serverAuthCode, forKey: "auth_code")
         }
         
         
