@@ -3,7 +3,7 @@
   <name>Sso</name>
   <description>Single Sign On Plugin</description>
 	<engines>
-		<engine name="cordova-android" version=">3.9.9" />
+		<engine name="cordova-android" version=">=7.1.0" />
 	</engines>
   <js-module src="www/sso.js" name='Sso' >
     <clobbers target="sso" />
@@ -134,12 +134,12 @@
       <access origin="https://*.fbcdn.net" />
       <access origin="https://*.akamaihd.net" />
       <access origin="https://accounts.google.com/*" />
-      <preference name="android-minSdkVersion" value="15" />
+      <preference name="android-minSdkVersion" value="19" />
     </config-file>
 
     <source-file src="src/android/facebook/facebooksettings.xml" target-dir="res/values" />
     
-    <config-file target="res/values/facebooksettings.xml" parent="/*">
+    <config-file target="app/src/main/res/values/facebooksettings.xml" parent="/*">
         <string name="fb_app_id">$FACEBOOK_APP_ID</string>
         <string name="fb_app_name">$FACEBOOK_APP_NAME</string>
     </config-file>
@@ -161,7 +161,7 @@
         android:label="@string/fb_app_name" />
     </config-file>
 
-    <config-file target="res/xml/config.xml" parent="widget">
+    <config-file target="res/xml/config.xml" parent="/*">
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
       <preference name='LineChannelId' value='$LINE_CHANNEL_ID'/>
