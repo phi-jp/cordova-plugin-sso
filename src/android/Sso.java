@@ -156,30 +156,30 @@ public class Sso extends CordovaPlugin {
 			loginWithFacebook(activity, callbackContext);
 			return true;
 		}
-		else if (action.equals("loginWithGoogle")) {
-			cordova.setActivityResultCallback(this);
-			// for Google signin
-			GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-			mGoogleSignInClient = GoogleSignIn.getClient(activity, gso);
+		// else if (action.equals("loginWithGoogle")) {
+		// 	cordova.setActivityResultCallback(this);
+		// 	// for Google signin
+		// 	GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+		// 	mGoogleSignInClient = GoogleSignIn.getClient(activity, gso);
 
-			// for scopes
-			String scopes = options.optString("scope", null);
-			if (scope != null && !scopes.isEmpty()) {
-				for (String scope : scopes.split(" ") ) {
-					gso.requestScopes(new Scope(scope));
-				}
-			}
+		// 	// for scopes
+		// 	String scopes = options.optString("scope", null);
+		// 	if (scope != null && !scopes.isEmpty()) {
+		// 		for (String scope : scopes.split(" ") ) {
+		// 			gso.requestScopes(new Scope(scope));
+		// 		}
+		// 	}
 
-			// for server client id (id token) 
-			String serverClientId = options.optString("serverClientId");
-			if (serverClientId != null && !serverClientId.isEmpty()) {
-				gso.requestIdToken(serverClientId);
-			}
+		// 	// for server client id (id token) 
+		// 	String serverClientId = options.optString("serverClientId");
+		// 	if (serverClientId != null && !serverClientId.isEmpty()) {
+		// 		gso.requestIdToken(serverClientId);
+		// 	}
 
-			Intent loginIntent = mGoogleSignInClient.getSignInIntent();
-			this.cordova.getActivity().startActivityForResult(loginIntent, RC_GOOGLEPLUS);
-			return true;
-		}
+		// 	Intent loginIntent = mGoogleSignInClient.getSignInIntent();
+		// 	this.cordova.getActivity().startActivityForResult(loginIntent, RC_GOOGLEPLUS);
+		// 	return true;
+		// }
 		else if (action.equals("logoutWithTwitter")) {
 			cordova.setActivityResultCallback(this);
 			logoutWithTwitter(activity, callbackContext);
@@ -195,11 +195,11 @@ public class Sso extends CordovaPlugin {
 			logoutWithFacebook(activity, callbackContext);
 			return true;
 		}
-		else if (action.equals(("logoutWithGoogle"))) {
-			cordova.setActivityResultCallback(this);
-			logoutWithGoogle(activity, callbackContext);
-			return true;
-		}
+		// else if (action.equals(("logoutWithGoogle"))) {
+		// 	cordova.setActivityResultCallback(this);
+		// 	logoutWithGoogle(activity, callbackContext);
+		// 	return true;
+		// }
 		else
 		{
 			return false;
@@ -225,11 +225,11 @@ public class Sso extends CordovaPlugin {
 		else if (action.equals("loginWithFacebook")) {
 			fbCallbackManager.onActivityResult(requestCode, resultCode, intent);
 		}
-		else if (action.equals("loginWithGoogle")){
-			if (intent == null) return;
-			GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
-			handleGoogleSignInResult(result);
-		}
+		// else if (action.equals("loginWithGoogle")){
+		// 	if (intent == null) return;
+		// 	GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
+		// 	handleGoogleSignInResult(result);
+		// }
 	}
 
 	private void loginWithTwitter(final Activity activity, final CallbackContext callbackContext) {
@@ -347,83 +347,83 @@ public class Sso extends CordovaPlugin {
 		}
 	}
 
-	private void logoutWithGoogle(final Activity activity, final CallbackContext callbackContext) {
-		if (mGoogleSignInClient == null) {
-			callbackContext.error("Please use login or trySilentLogin before logging out");
-			return;
-		};
+	// private void logoutWithGoogle(final Activity activity, final CallbackContext callbackContext) {
+	// 	if (mGoogleSignInClient == null) {
+	// 		callbackContext.error("Please use login or trySilentLogin before logging out");
+	// 		return;
+	// 	};
 
-		mGoogleSignInClient.revokeAccess();
+	// 	mGoogleSignInClient.revokeAccess();
 
-		mGoogleSignInClient.signOut().addOnCompleteListener(activity, new OnCompleteListener<Void>() {
-			@Override
-			public void onComplete(@NonNull Task<Void> task) {
-				callbackContext.success("logout");
-			}
-		});
-	}
+	// 	mGoogleSignInClient.signOut().addOnCompleteListener(activity, new OnCompleteListener<Void>() {
+	// 		@Override
+	// 		public void onComplete(@NonNull Task<Void> task) {
+	// 			callbackContext.success("logout");
+	// 		}
+	// 	});
+	// }
 
-	private void handleGoogleSignInResult(final GoogleSignInResult result) {
-		if (mGoogleSignInClient == null) {
-			callbackContext.error("GoogleApiClient was never initialized");
-			return;
-		}
+	// private void handleGoogleSignInResult(final GoogleSignInResult result) {
+	// 	if (mGoogleSignInClient == null) {
+	// 		callbackContext.error("GoogleApiClient was never initialized");
+	// 		return;
+	// 	}
 
-		if (result == null) {
-			callbackContext.error("result is null");
-			return;
-		}
+	// 	if (result == null) {
+	// 		callbackContext.error("result is null");
+	// 		return;
+	// 	}
 
-		if (!result.isSuccess()) {
-			String message;
-			Integer statusCode = result.getStatus().getStatusCode();
+	// 	if (!result.isSuccess()) {
+	// 		String message;
+	// 		Integer statusCode = result.getStatus().getStatusCode();
 
 
-			if (statusCode == 12501) {
-				message = "user canceled";
-			}
-			else if (statusCode == 8) {
-				message = "internal error has been occered";
-			}
-			else {
-				message = "error has been occered" + statusCode;
-			}
+	// 		if (statusCode == 12501) {
+	// 			message = "user canceled";
+	// 		}
+	// 		else if (statusCode == 8) {
+	// 			message = "internal error has been occered";
+	// 		}
+	// 		else {
+	// 			message = "error has been occered" + statusCode;
+	// 		}
 			
-			callbackContext.error(message);
-		}
-		else {
-			new AsyncTask<Void, Void, Void>() {
-				@Override
-				protected Void doInBackground(Void... params) {
-					GoogleSignInAccount acct = result.getSignInAccount();
-					JSONObject result = new JSONObject();
-					try {
-						JSONObject accessTokenBundle = getGoogleAuthToken(
-								cordova.getActivity(), acct.getAccount(), true
-						);
-						result.put(FIELD_GOOGLE_ACCESS_TOKEN, accessTokenBundle.get(FIELD_GOOGLE_ACCESS_TOKEN));
-						result.put(FIELD_GOOGLE_TOKEN_EXPIRES, accessTokenBundle.get(FIELD_GOOGLE_TOKEN_EXPIRES));
-						result.put(FIELD_GOOGLE_TOKEN_EXPIRES_IN, accessTokenBundle.get(FIELD_GOOGLE_TOKEN_EXPIRES_IN));
-						result.put("email", acct.getEmail());
-						result.put("token", acct.getIdToken());
-						result.put("serverAuthCode", acct.getServerAuthCode());
-						result.put("userId", acct.getId());
-						result.put("name", acct.getDisplayName());
-						result.put("last_name", acct.getFamilyName());
-						result.put("first_name", acct.getGivenName());
-						result.put("image", acct.getPhotoUrl());
-						callbackContext.success(result);
-					} catch (Exception e) {
-						callbackContext.error("Trouble obtaining result, error: " + e.getMessage());
-					}
-					return null;
-				}
-			}.execute();
+	// 		callbackContext.error(message);
+	// 	}
+	// 	else {
+	// 		new AsyncTask<Void, Void, Void>() {
+	// 			@Override
+	// 			protected Void doInBackground(Void... params) {
+	// 				GoogleSignInAccount acct = result.getSignInAccount();
+	// 				JSONObject result = new JSONObject();
+	// 				try {
+	// 					JSONObject accessTokenBundle = getGoogleAuthToken(
+	// 							cordova.getActivity(), acct.getAccount(), true
+	// 					);
+	// 					result.put(FIELD_GOOGLE_ACCESS_TOKEN, accessTokenBundle.get(FIELD_GOOGLE_ACCESS_TOKEN));
+	// 					result.put(FIELD_GOOGLE_TOKEN_EXPIRES, accessTokenBundle.get(FIELD_GOOGLE_TOKEN_EXPIRES));
+	// 					result.put(FIELD_GOOGLE_TOKEN_EXPIRES_IN, accessTokenBundle.get(FIELD_GOOGLE_TOKEN_EXPIRES_IN));
+	// 					result.put("email", acct.getEmail());
+	// 					result.put("token", acct.getIdToken());
+	// 					result.put("serverAuthCode", acct.getServerAuthCode());
+	// 					result.put("userId", acct.getId());
+	// 					result.put("name", acct.getDisplayName());
+	// 					result.put("last_name", acct.getFamilyName());
+	// 					result.put("first_name", acct.getGivenName());
+	// 					result.put("image", acct.getPhotoUrl());
+	// 					callbackContext.success(result);
+	// 				} catch (Exception e) {
+	// 					callbackContext.error("Trouble obtaining result, error: " + e.getMessage());
+	// 				}
+	// 				return null;
+	// 			}
+	// 		}.execute();
 
 
-		}
+	// 	}
 
-	}
+	// }
 	private String getTwitterKey() {
 		return preferences.getString("TwitterConsumerKey", "");
 	}
