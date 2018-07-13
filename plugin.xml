@@ -28,9 +28,7 @@
         <param name="onload" value="true" />
         <param name="ios-package" value="Sso" />
       </feature>
-    </config-file>
 
-    <config-file target="config.xml" parent="/*">
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
       <preference name="GoogleClientID" value="$GOOGLE_CLIENT_ID" />
@@ -117,7 +115,7 @@
 
 
 
-    <dependency id="cordova-plugin-add-swift-support" version="1.7.1"/>
+    <dependency id="cordova-plugin-add-swift-support" version="1.7.2"/>
     <preference name="UseSwiftLanguageVersion" default="4" />
   </platform>
 
