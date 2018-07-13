@@ -30,7 +30,7 @@
       </feature>
     </config-file>
 
-    <config-file target="config.xml" parent="widget">
+    <config-file target="config.xml" parent="/*">
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
       <preference name="GoogleClientID" value="$GOOGLE_CLIENT_ID" />
