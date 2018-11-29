@@ -3,62 +3,62 @@ import LineSDK
 import TwitterKit
 import FBSDKCoreKit
 import FBSDKLoginKit
-import GoogleSignIn
 
-
-@objc(Sso) class Sso :CDVPlugin, LineSDKLoginDelegate, GIDSignInDelegate, GIDSignInUIDelegate {
+@objc(Sso) class Sso :CDVPlugin {
 
     
     
     var callbackId:String?
-    var lineSDKApi: LineSDKAPI?
-    var googleSignin: GIDSignIn?
+    var twitterLogin: TWTRTwitter?
     
     // init
     override func pluginInitialize() {
         // for LINE
-        LineSDKLogin.sharedInstance().delegate = self
-        // let result = CDVPluginResult(status: CDVCommandStatus_OK)
-        // commandDelegate.send(result, callbackId:command.callbackId)
+        let lineChannelId = self.commandDelegate.settings["linechannelid"]
+        LoginManager.shared.setup(channelID: lineChannelId as! String, universalLinkURL: nil)
         
         
         // for Twitter
         let consumerKey = self.commandDelegate.settings["twitterconsumerkey"] as? String
         let consumerSecret = self.commandDelegate.settings["twitterconsumersecret"] as? String
-        Twitter.sharedInstance().start(withConsumerKey: consumerKey!, consumerSecret: consumerSecret!);
-
+        
+        twitterLogin =  TWTRTwitter.sharedInstance()
+        twitterLogin?.start(withConsumerKey: consumerKey!, consumerSecret: consumerSecret!);
+        
         // for Facebook
         FBSDKApplicationDelegate.sharedInstance().application(UIApplication.shared, didFinishLaunchingWithOptions: [:])
+        
+        
+        // notification from appDelegate application
+        NotificationCenter.default.addObserver(self, selector: #selector(type(of: self).notifyFromAppDelegate(notification:)), name: Notification.Name.CDVPluginHandleOpenURLWithAppSourceAndAnnotation, object: nil)
 
-        // for Google
-        googleSignin = GIDSignIn.sharedInstance()
-        googleSignin?.clientID = self.commandDelegate.settings["googleclientid"] as? String
-        googleSignin?.delegate = self
-        googleSignin?.uiDelegate = self
     }
-
 
     
     // for LINE
     func loginWithLine(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        
-        let lineSDKLogin = LineSDKLogin.sharedInstance()
-        
-        if (lineSDKLogin.canLoginWithLineApp()) {
-            lineSDKLogin.start()
-        }
-        else {
-            lineSDKLogin.startWebLogin(withSafariViewController: true)
+        LoginManager.shared.login(permissions: [.profile], in: CDVViewController()) {
+            result in
+            switch result {
+            case .success(let loginResult):
+                let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: self.lineResponseObject(result: loginResult))
+                
+                self.commandDelegate.send(result, callbackId: self.callbackId)
+            case .failure(let error):
+                let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.errorDescription)
+                self.commandDelegate.send(result, callbackId:self.callbackId)
+            }
         }
     }
     
     // for Twitter
     func loginWithTwitter(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        Twitter.sharedInstance().logIn(completion: { (session, error) in
-            if (session != nil) {
 
+        self.twitterLogin?.logIn(with: CDVViewController(), completion: { (session, error) in
+            if (session != nil) {
+                
                 let client = TWTRAPIClient(userID: session?.userID)
                 client.loadUser(withID: (session?.userID)!) { (user, error) -> Void in
                     if (error != nil) {
@@ -81,34 +81,12 @@ import GoogleSignIn
     // for Facebook
     func loginWithFacebook(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        FBSDKAccessToken.refreshCurrentAccessToken(nil)
+        
+        // Logout before login
+        let loginManger:FBSDKLoginManager = FBSDKLoginManager();
+        loginManger.logOut();
         FBSDKLoginManager().logIn(withReadPermissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
     }
-    
-    // for Google
-    func loginWithGoogle(_ command: CDVInvokedUrlCommand) {
-        self.callbackId = command.callbackId
-        
-        if let opts: Dictionary<String, Any> = command.argument(at: 0) as? Dictionary<String, Any> {
-            // scope
-            
-            let scopes = opts["scope"]
-            if scopes != nil {
-                googleSignin?.scopes = [scopes!]
-            }
-            
-            // server client id
-            let serverClientId = opts["serverClientId"]
-            if serverClientId != nil {
-                googleSignin?.serverClientID = serverClientId as! String
-            }
-        }
-        
-        googleSignin?.signIn()
-    }
-    
-    
-
     
     // Logout
     // If you have been logined once, the accessToken was saved in the device.
@@ -117,22 +95,25 @@ import GoogleSignIn
     // for Line
     func logoutWithLine(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        lineSDKApi?.logout(queue: .main, completion:{ success, error in
-            if (error != nil) {
+        
+        LoginManager.shared.logout { result in
+            switch result {
+            case .success:
+                let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
+                self.commandDelegate.send(result, callbackId:self.callbackId)
+                print("Logout from LINE")
+            case .failure(let error):
                 let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs:"error")
                 self.commandDelegate.send(result, callbackId:self.callbackId)
             }
-            else {
-                let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
-                self.commandDelegate.send(result, callbackId:self.callbackId)
-            }
-        })
+        }
+
     }
 
     // for Twitter
     func logoutWithTwitter(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        let store = Twitter.sharedInstance().sessionStore
+        let store = TWTRTwitter.sharedInstance().sessionStore
 
         if let userID = store.session()?.userID {
             store.logOutUserID(userID)
@@ -140,12 +121,12 @@ import GoogleSignIn
 
         let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
         self.commandDelegate.send(result, callbackId:self.callbackId)
-
     }
 
     // for Facebook
     func logoutWithFacebook(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
+        
         if (FBSDKAccessToken.current() != nil) {
             let loginManger:FBSDKLoginManager = FBSDKLoginManager();
             loginManger.logOut();
@@ -154,58 +135,6 @@ import GoogleSignIn
         let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
         self.commandDelegate.send(result, callbackId:self.callbackId)
     }
-
-    func logoutWithGoogle(_ command: CDVInvokedUrlCommand) {
-        self.callbackId = command.callbackId
-        GIDSignIn.sharedInstance().signOut()
-        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
-        self.commandDelegate.send(result, callbackId:self.callbackId)
-    }
-
-
-
-    
-
-    // line after login
-    func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
-        
-        if error != nil {
-            let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.debugDescription)
-            commandDelegate.send(result, callbackId:self.callbackId)
-        } else {
-            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:self.lineResponseObject(credential, profile))
-            commandDelegate.send(result, callbackId:self.callbackId)
-            
-            self.lineSDKApi = LineSDKAPI.init(configuration: LineSDKConfiguration.defaultConfig())
-            
-        }
-    }
-    
-    
-    // google after login
-    func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error!) {
-        if let error = error {
-            print("\(error.localizedDescription)")
-            let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.localizedDescription)
-            commandDelegate.send(result, callbackId:self.callbackId)
-        } else {
-            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:self.googleResponseObject(didSignInFor: user))
-            commandDelegate.send(result, callbackId:self.callbackId)
-        }
-    }
-    
-    // Present a view that prompts the user to sign in with Google
-    func sign(_ signIn: GIDSignIn!,
-              present viewController: UIViewController!) {
-        self.viewController.present(viewController, animated: true, completion: nil)
-    }
-    
-    // Dismiss the "Sign in with Google" view
-    func sign(_ signIn: GIDSignIn!,
-              dismiss viewController: UIViewController!) {
-        self.viewController.dismiss(animated: true, completion: nil)
-    }
-    
     
     // facebook login handler
     private func fbLoginHandler() -> FBSDKLoginManagerRequestTokenHandler {
@@ -262,20 +191,23 @@ import GoogleSignIn
         return data
     }
     
-    private func lineResponseObject(_ credential: LineSDKCredential?, _ profile: LineSDKProfile?) -> Dictionary<String, Any> {
-        var data = ["userId":nil, "name": nil, "image":nil, "token":nil] as [String : Any?]
-        if let displayName = profile?.displayName {
+    private func lineResponseObject(result: LoginResult) -> Dictionary<String, String> {
+        
+        var data = [:] as! [String : String]
+        
+        
+        if let displayName = result.userProfile?.displayName {
             data.updateValue(displayName, forKey: "name")
         }
-        if let userID = profile?.userID {
+        if let userID = result.userProfile?.userID {
             data.updateValue(userID, forKey: "userId")
         }
-        if let pictureURL = profile?.pictureURL {
+        if let pictureURL = result.userProfile?.pictureURLLarge {
             data.updateValue(String(describing: pictureURL), forKey: "image")
         }
-        if let _acessToken = credential?.accessToken?.accessToken as? String {
-            data.updateValue(_acessToken, forKey: "token")
-        }
+        
+        
+        data.updateValue(result.accessToken.value, forKey: "token")
 
         return data
     }
@@ -349,55 +281,6 @@ import GoogleSignIn
             return response as Any as! Dictionary<String, Any>
         }
     }
-    
-    private func googleResponseObject(didSignInFor user: GIDGoogleUser!)-> Dictionary<String, Any> {
-        var data = ["name": nil, "first_name": nil, "last_name": nil, "token": nil, "tokenExpiredAt": nil, "idToken": nil, "auth_code": nil, "idTokenExpiredAt": nil, "userId": nil, "image": nil, "email": nil] as [String: Any?]
-        
-        if (user == nil) {
-            return data
-        }
-        
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
-        
-        if let userId = user.userID {
-            data.updateValue(userId, forKey: "userId")
-        }
-        if let accessToken = user.authentication.accessToken {
-            data.updateValue(accessToken, forKey: "token")
-            data.updateValue(user.authentication.refreshToken, forKey: "refreshToken")
-            let date = dateFormatter.string(from: user.authentication.accessTokenExpirationDate)
-            data.updateValue(date, forKey: "tokenExpiredAt")
-        }
-        if let idToken = user.authentication.idToken {
-            data.updateValue(idToken, forKey: "idToken")
-            data.updateValue(user.authentication.refreshToken, forKey: "refreshToken")
-            let date = dateFormatter.string(from: user.authentication.idTokenExpirationDate)
-            data.updateValue(date, forKey: "idTokenExpiredAt")
-        }
-        if let fullName = user.profile.name {
-            data.updateValue(fullName, forKey: "name")
-        }
-        if let givenName = user.profile.givenName {
-            data.updateValue(givenName, forKey: "first_name")
-        }
-        if let familyName = user.profile.familyName {
-            data.updateValue(familyName, forKey: "last_name")
-        }
-        if let email = user.profile.email {
-            data.updateValue(email, forKey: "email")
-        }
-        if let image = user.profile.imageURL(withDimension: 512) {
-            data.updateValue(image.absoluteString, forKey: "image")
-        }
-        if let serverAuthCode = user.serverAuthCode {
-            data.updateValue(serverAuthCode, forKey: "auth_code")
-        }
-        
-        
-        return data
-    }
 
     private func topMostController() -> UIViewController {
         var topController:UIViewController  = (UIApplication.shared.keyWindow?.rootViewController)!;
@@ -408,4 +291,40 @@ import GoogleSignIn
         return topController
     }
     
+    func notifyFromAppDelegate(notification: Notification) {
+        if let object = notification.object {
+            let url = ((object as! [String: Any])["url"])!
+            let isFromTwitter = (url as! NSURL).absoluteString!.contains("twitterkit")
+            let isFromLine = (url as! NSURL).absoluteString!.contains("line3rdp")
+            let isFromFacebook = (url as! NSURL).absoluteString!.prefix(2) == "fb";
+            
+            
+            let sourceApplication = ((object as! [String: Any])["sourceApplication"])!
+            let annotation = ((object as! [String: Any])["annotation"])
+            var options:[UIApplication.OpenURLOptionsKey:Any] = [:]
+            
+            options[UIApplication.OpenURLOptionsKey.sourceApplication] = sourceApplication
+            
+            if let an = annotation {
+                options[UIApplication.OpenURLOptionsKey.openInPlace] = an
+                return
+            }
+            else {
+                options[UIApplication.OpenURLOptionsKey.openInPlace] = 0
+            }
+            
+            
+            if isFromTwitter {
+                TWTRTwitter().application(UIApplication.shared, open: url as! URL, options: options)
+            }
+            
+            if isFromLine {
+                LoginManager.shared.application(UIApplication.shared, open: url as? URL, options: options)  
+            }
+            
+            if isFromFacebook {
+                FBSDKApplicationDelegate.sharedInstance()?.application(UIApplication.shared, open: url as? URL, sourceApplication: sourceApplication as? String, annotation: options[UIApplication.OpenURLOptionsKey.openInPlace])
+            }
+        }
+    }
 }

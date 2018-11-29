@@ -7,25 +7,35 @@ If you use this plugin, you can be available for realizing SSO (Single Sign On) 
 
 ## Install
 
+This plugin is using CocoaPods.
+Before install this plugin, please install CocoaPods
+
 ```
-$ cordova plguin add cordova-plugin-sso
+$ gem install cocoapods
+$ pod setup
+```
+
+and Install 
+
+```
+$ cordova plguin add cordova-plugin-sso --variable TWITTER_KEY=XXXX --variable TWITTER_SECRET=XXXX
 ```
 
 And add config.xml below code
 
 ```xml
-<plugin name="cordova-plugin-sso" spec="0.0.9">
+<plugin name="cordova-plugin-sso" spec="0.2.0">
     <variable name="LINE_BUNDLE_ID" value="line3rdp.[YOUR BUNDLE ID]" />
     <variable name="LINE_CHANNEL_ID" value=[LINE_CHANNLE_ID] />
     <variable name="TWITTER_KEY" value=[Twitter Consumer Key] />
     <variable name="TWITTER_SECRET" value=[Twitter Consumer Secret] />
     <variable name="FACEBOOK_APP_ID" value=[Facebook app id] />
     <variable name="FACEBOOK_APP_NAME" value=[Facebook app name] />
-    <variable name="GOOGLE_CLIENT_ID" value=[Google client id] />
-    <variable name="GOOGLE_REVERSED_CLIENT_ID" value=[Google reversed client id] />
 </plugin>
 
 ```
+
+this plugin
 
 ## Service Settings 
 
@@ -41,8 +51,6 @@ $ keytool -exportcert -alias androiddebugkey -keystore .keystore | openssl sha1 
 
 ### Facebook
 
-
-### Google
 
 #### for iOS
 
@@ -80,7 +88,7 @@ If your project is only debug, only you have to do is entering below code on the
 - Facebook
 - Google
 
-### Login
+### Login Example
 
 ```javascript
 if (window.sso) {
@@ -130,3 +138,17 @@ if (window.sso) {
   });
 }
 ```
+
+### UPDATING
+
+#### 0.2.0 (only iOS update)
+
+##### iOS
+
+- Using cocoapods
+- Updating all iOS SDK (Twitter Facebook LINE) 
+  - TwitterKit:  3.4.0
+  - FBSDKLoginKit: 4.38
+  - LineSDKSwift:  5.0
+
+- Using NotificationCenter and Removing app delegate

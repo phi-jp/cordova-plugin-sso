@@ -1,13 +1,12 @@
 {
   "name": "cordova-plugin-sso",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "cordova-plugin-sso",
   "cordova" : {
     "id": "cordova-plugin-sso",
     "platforms": [
       "android",
-      "ios",
-      "browser"
+      "ios"
     ]
   },
   "main": "index.js",
@@ -23,5 +22,15 @@
   "bugs": {
     "url": "https://github.com/phi-jp/cordova-plugin-sso/issues"
   },
-  "homepage": "https://github.com/phi-jp/cordova-plugin-sso#readme"
+  "dependencies": {
+    "xml2js": "^0.4.16"
+  },
+  "homepage": "https://github.com/phi-jp/cordova-plugin-sso#readme",
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android",
+    "cordova:plugin",
+    "plugin"
+  ]
 }

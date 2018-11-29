@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-sso" version="0.1.6">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-sso" version="0.2.0">
   <name>Sso</name>
   <description>Single Sign On Plugin</description>
+  <dependency id="cordova-plugin-cocoapod-support" url="https://github.com/snuffy/cordova-plugin-cocoapods-support" />
 	<engines>
 		<engine name="cordova-android" version=">=7.1.0" />
 	</engines>
@@ -18,9 +19,6 @@
   <preference name="FACEBOOK_APP_ID" default="defaultValue" />
   <preference name="FACEBOOK_APP_NAME" default="defaultValue" />
 
-  <preference name="GOOGLE_CLIENT_ID" default="defaultValue" />
-  <preference name="GOOGLE_REVERSED_CLIENT_ID" default="defaultValue" />
-
   <!-- iOS -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
@@ -31,8 +29,8 @@
 
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
-      <preference name="GoogleClientID" value="$GOOGLE_CLIENT_ID" />
-      <preference name="deployment-target" value="7.0" />
+      <preference name="LINECHANNELID" value="$LINE_CHANNEL_ID" />
+      <preference name="deployment-target" value="10.0" />
     </config-file>
 
     <config-file target="*-Info.plist" parent="LineSDKConfig">
@@ -81,39 +79,13 @@
         <string>$FACEBOOK_APP_NAME</string>
     </config-file>
 
-    <source-file src="src/ios/AppDelegate+Sso.h" />
-    <source-file src="src/ios/AppDelegate+Sso.m" />
     <source-file src="src/ios/sso.swift" />
     <source-file src="src/ios/Sso-Bridging-Header.h" />
 
-    <framework src="src/ios/line/LineSDK.framework" custom="true" />
-
-
-    <framework src="src/ios/twitter/TwitterKit.framework" custom="true" />
-    <framework src="src/ios/twitter/TwitterCore.framework" custom="true" />
-    <resource-file src="src/ios/twitter/TwitterKit.framework/TwitterKitResources.bundle" />
-    <resource-file src="src/ios/twitter/TwitterKit.framework/TwitterShareExtensionUIResources.bundle" />
-
-    <framework src="src/ios/facebook/Bolts.framework" custom="true" />
-    <framework src="src/ios/facebook/FBSDKCoreKit.framework" custom="true" />
-    <framework src="src/ios/facebook/FBSDKLoginKit.framework" custom="true" />
-
-    <!-- Google login  -->
-    <framework src="src/ios/google/GoogleSignIn.bundle" custom="true" />
-    <framework src="src/ios/google/GoogleSignIn.framework" custom="true" />
-    <framework src="src/ios/google/GoogleSignInDependencies.framework" custom="true" />
-
-    <!-- System Framework -->
-    <framework src="AddressBook.framework" weak="true" />
-    <framework src="CoreText.framework" weak="true" />
-    <framework src="SafariServices.framework" weak="true" />
-    <framework src="Security.framework" weak="true" />
-    <framework src="SystemConfiguration.framework" weak="true" />
-    <framework src="CoreTelephony.framework" />
-    <framework src="libz.tbd" weak="true" />
-    <framework src="libz.dylib" weak="true" />
-
-
+    <pods-config use-frameworks="true" />
+    <pod id="TwitterKit" version="3.4.0" />
+    <pod id="FBSDKLoginKit" version="~> 4.38" />
+    <pod id="LineSDKSwift" version="~> 5.0" />
 
     <dependency id="cordova-plugin-add-swift-support" version="1.7.2"/>
     <preference name="UseSwiftLanguageVersion" default="4" />
@@ -131,13 +103,12 @@
       <access origin="https://api.facebook.com" />
       <access origin="https://*.fbcdn.net" />
       <access origin="https://*.akamaihd.net" />
-      <access origin="https://accounts.google.com/*" />
       <preference name="android-minSdkVersion" value="19" />
     </config-file>
 
     <source-file src="src/android/facebook/facebooksettings.xml" target-dir="res/values" />
-    
-    <config-file target="app/src/main/res/values/facebooksettings.xml" parent="/*">
+
+    <config-file target="/app/src/main/res/values/facebooksettings.xml" parent="/*">
         <string name="fb_app_id">$FACEBOOK_APP_ID</string>
         <string name="fb_app_name">$FACEBOOK_APP_NAME</string>
     </config-file>
@@ -171,11 +142,6 @@
     <framework src="src/android/twitter/twitter.gradle" custom="true" type="gradleReference" />
     <source-file src="src/android/twitter/UserShowServiceApi.java" target-dir="src/com/singlesignon" />
     <lib-file src="src/android/line/line-sdk-4.0.5.aar" />
-    <!--google-->
-    <framework src="com.google.android.gms:play-services-auth:11.8.0" />
-    <framework src="com.google.android.gms:play-services-identity:11.8.0" />
-    
-
 
     <framework src="src/android/line/line.gradle" custom="true" type="gradleReference" />
     
