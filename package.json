@@ -1,13 +1,12 @@
 {
   "name": "cordova-plugin-sso",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "cordova-plugin-sso",
   "cordova" : {
     "id": "cordova-plugin-sso",
     "platforms": [
       "android",
-      "ios",
-      "browser"
+      "ios"
     ]
   },
   "main": "index.js",

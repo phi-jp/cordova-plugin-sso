@@ -7,14 +7,24 @@ If you use this plugin, you can be available for realizing SSO (Single Sign On) 
 
 ## Install
 
+This plugin is using CocoaPods.
+Before install this plugin, please install CocoaPods
+
 ```
-$ cordova plguin add cordova-plugin-sso
+$ gem install cocoapods
+$ pod setup
+```
+
+and Install 
+
+```
+$ cordova plguin add cordova-plugin-sso --variable TWITTER_KEY=XXXX --variable TWITTER_SECRET=XXXX
 ```
 
 And add config.xml below code
 
 ```xml
-<plugin name="cordova-plugin-sso" spec="0.0.9">
+<plugin name="cordova-plugin-sso" spec="0.2.0">
     <variable name="LINE_BUNDLE_ID" value="line3rdp.[YOUR BUNDLE ID]" />
     <variable name="LINE_CHANNEL_ID" value=[LINE_CHANNLE_ID] />
     <variable name="TWITTER_KEY" value=[Twitter Consumer Key] />
@@ -24,6 +34,8 @@ And add config.xml below code
 </plugin>
 
 ```
+
+this plugin
 
 ## Service Settings 
 
@@ -126,3 +138,17 @@ if (window.sso) {
   });
 }
 ```
+
+### UPDATING
+
+#### 0.2.0 (only iOS update)
+
+##### iOS
+
+- Using cocoapods
+- Updating all iOS SDK (Twitter Facebook LINE) 
+  - TwitterKit:  3.4.0
+  - FBSDKLoginKit: 4.38
+  - LineSDKSwift:  5.0
+
+- Using NotificationCenter and Removing app delegate
