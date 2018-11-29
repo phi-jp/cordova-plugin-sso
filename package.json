@@ -23,5 +23,15 @@
   "bugs": {
     "url": "https://github.com/phi-jp/cordova-plugin-sso/issues"
   },
-  "homepage": "https://github.com/phi-jp/cordova-plugin-sso#readme"
+  "dependencies": {
+    "xml2js": "^0.4.16"
+  },
+  "homepage": "https://github.com/phi-jp/cordova-plugin-sso#readme",
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android",
+    "cordova:plugin",
+    "plugin"
+  ]
 }
