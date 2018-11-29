@@ -3,7 +3,7 @@ import LineSDK
 import TwitterKit
 import FBSDKCoreKit
 import FBSDKLoginKit
-import GoogleSignIn
+// import GoogleSignIn
 
 
 @objc(Sso) class Sso :CDVPlugin, LineSDKLoginDelegate, GIDSignInDelegate, GIDSignInUIDelegate {
