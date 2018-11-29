@@ -3,8 +3,12 @@ import LineSDK
 import TwitterKit
 import FBSDKCoreKit
 import FBSDKLoginKit
+import GoogleSignIn
 
-@objc(Sso) class Sso : CDVPlugin, LineSDKLoginDelegate {
+
+@objc(Sso) class Sso :CDVPlugin, LineSDKLoginDelegate, GIDSignInDelegate, GIDSignInUIDelegate {
+
+    
     
     var callbackId:String?
     var lineSDKApi: LineSDKAPI?
@@ -31,6 +35,12 @@ import FBSDKLoginKit
         
         // notification from appDelegate application
         NotificationCenter.default.addObserver(self, selector: #selector(type(of: self).notifyFromAppDelegate(notification:)), name: Notification.Name.CDVPluginHandleOpenURLWithAppSourceAndAnnotation, object: nil)
+
+        // for Google
+        // googleSignin = GIDSignIn.sharedInstance()
+        // googleSignin?.clientID = self.commandDelegate.settings["googleclientid"] as? String
+        // googleSignin?.delegate = self
+        // googleSignin?.uiDelegate = self
     }
 
     
@@ -84,6 +94,31 @@ import FBSDKLoginKit
         FBSDKLoginManager().logIn(withReadPermissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
     }
     
+    // for Google
+    func loginWithGoogle(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId
+        
+        if let opts: Dictionary<String, Any> = command.argument(at: 0) as? Dictionary<String, Any> {
+            // scope
+            
+            let scopes = opts["scope"]
+            if scopes != nil {
+                googleSignin?.scopes = [scopes!]
+            }
+            
+            // server client id
+            let serverClientId = opts["serverClientId"]
+            if serverClientId != nil {
+                googleSignin?.serverClientID = serverClientId as! String
+            }
+        }
+        
+        googleSignin?.signIn()
+    }
+    
+    
+
+    
     // Logout
     // If you have been logined once, the accessToken was saved in the device.
     // So if you try to refresh profile, you have to execute 'logout' method.
@@ -129,9 +164,18 @@ import FBSDKLoginKit
         self.commandDelegate.send(result, callbackId:self.callbackId)
     }
 
-    
+    func logoutWithGoogle(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId
+        GIDSignIn.sharedInstance().signOut()
+        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
+        self.commandDelegate.send(result, callbackId:self.callbackId)
+    }
+
+
 
     
+
+    // line after login
     func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
         
         if error != nil {
@@ -146,6 +190,33 @@ import FBSDKLoginKit
         }
     }
     
+    
+    // google after login
+    func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error!) {
+        if let error = error {
+            print("\(error.localizedDescription)")
+            let result = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.localizedDescription)
+            commandDelegate.send(result, callbackId:self.callbackId)
+        } else {
+            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:self.googleResponseObject(didSignInFor: user))
+            commandDelegate.send(result, callbackId:self.callbackId)
+        }
+    }
+    
+    // Present a view that prompts the user to sign in with Google
+    func sign(_ signIn: GIDSignIn!,
+              present viewController: UIViewController!) {
+        self.viewController.present(viewController, animated: true, completion: nil)
+    }
+    
+    // Dismiss the "Sign in with Google" view
+    func sign(_ signIn: GIDSignIn!,
+              dismiss viewController: UIViewController!) {
+        self.viewController.dismiss(animated: true, completion: nil)
+    }
+    
+    
+    // facebook login handler
     private func fbLoginHandler() -> FBSDKLoginManagerRequestTokenHandler {
         let loginHandler: FBSDKLoginManagerRequestTokenHandler = { (result, error) -> Void in
             if (error != nil) {
@@ -196,6 +267,7 @@ import FBSDKLoginKit
         if let token = session?.authToken {
             data.updateValue(token, forKey: "token")
         }
+        
         return data
     }
     
@@ -285,6 +357,55 @@ import FBSDKLoginKit
             response.updateValue(responseAuth, forKey: "authResponse")
             return response as Any as! Dictionary<String, Any>
         }
+    }
+    
+    private func googleResponseObject(didSignInFor user: GIDGoogleUser!)-> Dictionary<String, Any> {
+        var data = ["name": nil, "first_name": nil, "last_name": nil, "token": nil, "tokenExpiredAt": nil, "idToken": nil, "auth_code": nil, "idTokenExpiredAt": nil, "userId": nil, "image": nil, "email": nil] as [String: Any?]
+        
+        if (user == nil) {
+            return data
+        }
+        
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
+        
+        if let userId = user.userID {
+            data.updateValue(userId, forKey: "userId")
+        }
+        if let accessToken = user.authentication.accessToken {
+            data.updateValue(accessToken, forKey: "token")
+            data.updateValue(user.authentication.refreshToken, forKey: "refreshToken")
+            let date = dateFormatter.string(from: user.authentication.accessTokenExpirationDate)
+            data.updateValue(date, forKey: "tokenExpiredAt")
+        }
+        if let idToken = user.authentication.idToken {
+            data.updateValue(idToken, forKey: "idToken")
+            data.updateValue(user.authentication.refreshToken, forKey: "refreshToken")
+            let date = dateFormatter.string(from: user.authentication.idTokenExpirationDate)
+            data.updateValue(date, forKey: "idTokenExpiredAt")
+        }
+        if let fullName = user.profile.name {
+            data.updateValue(fullName, forKey: "name")
+        }
+        if let givenName = user.profile.givenName {
+            data.updateValue(givenName, forKey: "first_name")
+        }
+        if let familyName = user.profile.familyName {
+            data.updateValue(familyName, forKey: "last_name")
+        }
+        if let email = user.profile.email {
+            data.updateValue(email, forKey: "email")
+        }
+        if let image = user.profile.imageURL(withDimension: 512) {
+            data.updateValue(image.absoluteString, forKey: "image")
+        }
+        if let serverAuthCode = user.serverAuthCode {
+            data.updateValue(serverAuthCode, forKey: "auth_code")
+        }
+        
+        
+        return data
     }
 
     private func topMostController() -> UIViewController {
