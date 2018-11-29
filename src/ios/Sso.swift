@@ -8,6 +8,7 @@ import FBSDKLoginKit
     
     var callbackId:String?
     var lineSDKApi: LineSDKAPI?
+    var twitterLogin: TWTRTwitter?
     
     // init
     override func pluginInitialize() {
@@ -20,12 +21,17 @@ import FBSDKLoginKit
         // for Twitter
         let consumerKey = self.commandDelegate.settings["twitterconsumerkey"] as? String
         let consumerSecret = self.commandDelegate.settings["twitterconsumersecret"] as? String
-        Twitter.sharedInstance().start(withConsumerKey: consumerKey!, consumerSecret: consumerSecret!);
-
+        
+        twitterLogin =  TWTRTwitter.sharedInstance()
+        twitterLogin?.start(withConsumerKey: consumerKey!, consumerSecret: consumerSecret!);
+        
         // for Facebook
         FBSDKApplicationDelegate.sharedInstance().application(UIApplication.shared, didFinishLaunchingWithOptions: [:])
+        
+        
+        // notification from appDelegate application
+        NotificationCenter.default.addObserver(self, selector: #selector(type(of: self).notifyFromAppDelegate(notification:)), name: Notification.Name.CDVPluginHandleOpenURLWithAppSourceAndAnnotation, object: nil)
     }
-
 
     
     // for LINE
@@ -45,9 +51,10 @@ import FBSDKLoginKit
     // for Twitter
     func loginWithTwitter(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        Twitter.sharedInstance().logIn(completion: { (session, error) in
-            if (session != nil) {
 
+        self.twitterLogin?.logIn(with: CDVViewController(), completion: { (session, error) in
+            if (session != nil) {
+                
                 let client = TWTRAPIClient(userID: session?.userID)
                 client.loadUser(withID: (session?.userID)!) { (user, error) -> Void in
                     if (error != nil) {
@@ -70,10 +77,12 @@ import FBSDKLoginKit
     // for Facebook
     func loginWithFacebook(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        FBSDKAccessToken.refreshCurrentAccessToken(nil)
+        
+        // Logout before login
+        let loginManger:FBSDKLoginManager = FBSDKLoginManager();
+        loginManger.logOut();
         FBSDKLoginManager().logIn(withReadPermissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
     }
-    
     
     // Logout
     // If you have been logined once, the accessToken was saved in the device.
@@ -97,7 +106,7 @@ import FBSDKLoginKit
     // for Twitter
     func logoutWithTwitter(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        let store = Twitter.sharedInstance().sessionStore
+        let store = TWTRTwitter.sharedInstance().sessionStore
 
         if let userID = store.session()?.userID {
             store.logOutUserID(userID)
@@ -105,12 +114,12 @@ import FBSDKLoginKit
 
         let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logout")
         self.commandDelegate.send(result, callbackId:self.callbackId)
-
     }
 
     // for Facebook
     func logoutWithFacebook(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
+        
         if (FBSDKAccessToken.current() != nil) {
             let loginManger:FBSDKLoginManager = FBSDKLoginManager();
             loginManger.logOut();
@@ -285,5 +294,43 @@ import FBSDKLoginKit
         }
         
         return topController
+    }
+    
+    func notifyFromAppDelegate(notification: Notification) {
+        if let object = notification.object {
+            let url = ((object as! [String: Any])["url"])!
+            let isFromTwitter = (url as! NSURL).absoluteString!.contains("twitterkit")
+            let isFromLine = (url as! NSURL).absoluteString!.contains("line3rdp")
+            let isFromFacebook = (url as! NSURL).absoluteString!.prefix(2) == "fb";
+            
+            
+            let sourceApplication = ((object as! [String: Any])["sourceApplication"])!
+            let annotation = ((object as! [String: Any])["annotation"])
+            var options:[String:Any] = [:]
+            
+            options["UIApplicationOpenURLOptionsSourceApplicationKey"] = sourceApplication
+            
+            if let an = annotation {
+                options["UIApplicationOpenURLOptionsOpenInPlaceKey"] = an
+                return
+            }
+            else {
+                options["UIApplicationOpenURLOptionsOpenInPlaceKey"] = 0
+            }
+            
+            
+            if isFromTwitter {
+                TWTRTwitter().application(UIApplication.shared, open: url as! URL, options: options)
+            }
+            
+            if isFromLine {
+                LineSDKLogin.sharedInstance().handleOpen(url as! URL)
+            }
+            
+            if isFromFacebook {
+                FBSDKApplicationDelegate.sharedInstance()?.application(UIApplication.shared, open: url as? URL, sourceApplication: sourceApplication as? String, annotation: options["UIApplicationOpenURLOptionsOpenInPlaceKey"])
+            }
+            
+        }
     }
 }
