@@ -21,8 +21,6 @@ And add config.xml below code
     <variable name="TWITTER_SECRET" value=[Twitter Consumer Secret] />
     <variable name="FACEBOOK_APP_ID" value=[Facebook app id] />
     <variable name="FACEBOOK_APP_NAME" value=[Facebook app name] />
-    <variable name="GOOGLE_CLIENT_ID" value=[Google client id] />
-    <variable name="GOOGLE_REVERSED_CLIENT_ID" value=[Google reversed client id] />
 </plugin>
 
 ```
@@ -41,8 +39,6 @@ $ keytool -exportcert -alias androiddebugkey -keystore .keystore | openssl sha1 
 
 ### Facebook
 
-
-### Google
 
 #### for iOS
 
@@ -80,7 +76,7 @@ If your project is only debug, only you have to do is entering below code on the
 - Facebook
 - Google
 
-### Login
+### Login Example
 
 ```javascript
 if (window.sso) {
