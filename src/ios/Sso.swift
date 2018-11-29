@@ -6,7 +6,7 @@ import FBSDKLoginKit
 // import GoogleSignIn
 
 
-@objc(Sso) class Sso :CDVPlugin, LineSDKLoginDelegate, GIDSignInDelegate, GIDSignInUIDelegate {
+@objc(Sso) class Sso :CDVPlugin, LineSDKLoginDelegate {
 
     
     
