@@ -24,7 +24,7 @@ $ cordova plguin add cordova-plugin-sso --variable TWITTER_KEY=XXXX --variable T
 And add config.xml below code
 
 ```xml
-<plugin name="cordova-plugin-sso" spec="0.2.0">
+<plugin name="cordova-plugin-sso" spec="0.2.1">
     <variable name="LINE_BUNDLE_ID" value="line3rdp.[YOUR BUNDLE ID]" />
     <variable name="LINE_CHANNEL_ID" value=[LINE_CHANNLE_ID] />
     <variable name="TWITTER_KEY" value=[Twitter Consumer Key] />
@@ -86,7 +86,6 @@ If your project is only debug, only you have to do is entering below code on the
 - Twitter
 - Line
 - Facebook
-- Google
 
 ### Login Example
 
@@ -141,7 +140,7 @@ if (window.sso) {
 
 ### UPDATING
 
-#### 0.2.0 (only iOS update)
+#### 0.2.1 (only iOS update)
 
 ##### iOS
 
@@ -151,4 +150,8 @@ if (window.sso) {
   - FBSDKLoginKit: 4.38
   - LineSDKSwift:  5.0
 
-- Using NotificationCenter and Removing app delegate
+- Using NotificationCenter and Removing app delegat
+- remove Google signin
+
+#### Android
+- remove Google signin
