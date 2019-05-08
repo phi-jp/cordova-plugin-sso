@@ -23,7 +23,7 @@
     "url": "https://github.com/phi-jp/cordova-plugin-sso/issues"
   },
   "dependencies": {
-    "xml2js": "^0.4.16"
+    "xml2js": "^0.4.19"
   },
   "homepage": "https://github.com/phi-jp/cordova-plugin-sso#readme",
   "keywords": [
