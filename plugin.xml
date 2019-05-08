@@ -82,9 +82,9 @@
     <source-file src="src/ios/Sso-Bridging-Header.h" />
 
     <pods-config use-frameworks="true" />
-    <pod id="TwitterKit" version="3.4.0" />
-    <pod id="FBSDKLoginKit" version="~> 4.38" />
-    <pod id="LineSDKSwift" version="~> 5.0" />
+    <pod id="GXTwitterKit" version="~>3.4.5" />
+    <pod id="FBSDKLoginKit" version="~> 5.0" />
+    <pod id="LineSDKSwift" version="~> 5.1" />
 
     <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
     <preference name="UseSwiftLanguageVersion" default="4" />
