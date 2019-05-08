@@ -26,7 +26,7 @@ import FBSDKLoginKit
         twitterLogin?.start(withConsumerKey: consumerKey!, consumerSecret: consumerSecret!);
         
         // for Facebook
-        FBSDKApplicationDelegate.sharedInstance().application(UIApplication.shared, didFinishLaunchingWithOptions: [:])
+        ApplicationDelegate.shared.application(UIApplication.shared, didFinishLaunchingWithOptions: [:])
         
         
         // notification from appDelegate application
@@ -36,7 +36,7 @@ import FBSDKLoginKit
 
     
     // for LINE
-    func loginWithLine(_ command: CDVInvokedUrlCommand) {
+    @objc func loginWithLine(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
         LoginManager.shared.login(permissions: [.profile], in: CDVViewController()) {
             result in
@@ -53,7 +53,7 @@ import FBSDKLoginKit
     }
     
     // for Twitter
-    func loginWithTwitter(_ command: CDVInvokedUrlCommand) {
+    @objc func loginWithTwitter(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
 
         self.twitterLogin?.logIn(with: CDVViewController(), completion: { (session, error) in
@@ -79,13 +79,13 @@ import FBSDKLoginKit
     }
 
     // for Facebook
-    func loginWithFacebook(_ command: CDVInvokedUrlCommand) {
+    @objc func loginWithFacebook(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
         
         // Logout before login
-        let loginManger:FBSDKLoginManager = FBSDKLoginManager();
+        let loginManger = LoginManager();
         loginManger.logOut();
-        FBSDKLoginManager().logIn(withReadPermissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
+        LoginManager().logIn(permissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
     }
     
     // Logout
@@ -93,7 +93,7 @@ import FBSDKLoginKit
     // So if you try to refresh profile, you have to execute 'logout' method.
 
     // for Line
-    func logoutWithLine(_ command: CDVInvokedUrlCommand) {
+    @objc func logoutWithLine(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
         
         LoginManager.shared.logout { result in
@@ -111,7 +111,7 @@ import FBSDKLoginKit
     }
 
     // for Twitter
-    func logoutWithTwitter(_ command: CDVInvokedUrlCommand) {
+    @objc func logoutWithTwitter(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
         let store = TWTRTwitter.sharedInstance().sessionStore
 
@@ -124,11 +124,11 @@ import FBSDKLoginKit
     }
 
     // for Facebook
-    func logoutWithFacebook(_ command: CDVInvokedUrlCommand) {
+    @objc func logoutWithFacebook(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
         
-        if (FBSDKAccessToken.current() != nil) {
-            let loginManger:FBSDKLoginManager = FBSDKLoginManager();
+        if (AccessToken.current != nil) {
+            let loginManger = LoginManager();
             loginManger.logOut();
         }
 
@@ -137,8 +137,8 @@ import FBSDKLoginKit
     }
     
     // facebook login handler
-    private func fbLoginHandler() -> FBSDKLoginManagerRequestTokenHandler {
-        let loginHandler: FBSDKLoginManagerRequestTokenHandler = { (result, error) -> Void in
+    private func fbLoginHandler() -> LoginManagerLoginResultBlock {
+        let loginHandler: LoginManagerLoginResultBlock = { (result, error) -> Void in
             if (error != nil) {
                 // If the SDK has a message for the user, surface it.
                 let errorMessage = "There was a problem logging you in."
@@ -214,14 +214,14 @@ import FBSDKLoginKit
     
     private func fbResponseObject() -> Dictionary<String, Any> {
         
-        if (!(FBSDKAccessToken.current() != nil)) {
+        if (!(AccessToken.current != nil)) {
             return [ "status": "unknown" ]
         }
         
         var response:Dictionary = ["status" : nil, "authResponse": nil] as [String : Any?]
         
         
-        let token = FBSDKAccessToken.current()
+        let token = AccessToken.current
         let expiresTimeInterval = token?.expirationDate.timeIntervalSinceNow
         var expiresIn = "0"
 
@@ -245,7 +245,7 @@ import FBSDKLoginKit
         let runRoop = RunLoop.current
         var profileError:Error?
     
-        FBSDKProfile.loadCurrentProfile { (profile, error) in
+        Profile.loadCurrentProfile { (profile, error) in
             if (error != nil) {
                 profileError = error
             }
@@ -261,7 +261,7 @@ import FBSDKLoginKit
                     responseAuth.updateValue(lastName, forKey: "last_name")
                 }
                 if (profile != nil) {
-                    let image:String? = profile?.imageURL(for: FBSDKProfilePictureMode.square, size: CGSize(width: 320, height: 320)).absoluteString
+                    let image:String? = profile?.imageURL(forMode: Profile.PictureMode.square, size: CGSize(width: 320, height: 320))?.absoluteString
                     responseAuth.updateValue(image as Any, forKey: "image")
                 }
             }
@@ -291,7 +291,7 @@ import FBSDKLoginKit
         return topController
     }
     
-    func notifyFromAppDelegate(notification: Notification) {
+    @objc func notifyFromAppDelegate(notification: Notification) {
         if let object = notification.object {
             let url = ((object as! [String: Any])["url"])!
             let isFromTwitter = (url as! NSURL).absoluteString!.contains("twitterkit")
@@ -317,13 +317,13 @@ import FBSDKLoginKit
             if isFromTwitter {
                 TWTRTwitter().application(UIApplication.shared, open: url as! URL, options: options)
             }
-            
+
             if isFromLine {
                 LoginManager.shared.application(UIApplication.shared, open: url as? URL, options: options)  
             }
             
             if isFromFacebook {
-                FBSDKApplicationDelegate.sharedInstance()?.application(UIApplication.shared, open: url as? URL, sourceApplication: sourceApplication as? String, annotation: options[UIApplication.OpenURLOptionsKey.openInPlace])
+                ApplicationDelegate.shared.application(UIApplication.shared, open: url as! URL, sourceApplication: sourceApplication as? String, annotation: options[UIApplication.OpenURLOptionsKey.openInPlace])
             }
         }
     }
