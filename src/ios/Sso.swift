@@ -3,14 +3,14 @@ import LineSDK
 import TwitterKit
 import FBSDKCoreKit
 import FBSDKLoginKit
+import GoogleSignIn
 
-@objc(Sso) class Sso :CDVPlugin {
+@objc(Sso) class Sso :CDVPlugin, GIDSignInDelegate, GIDSignInUIDelegate {
 
-    
     
     var callbackId:String?
     var twitterLogin: TWTRTwitter?
-    
+    var googleSignin: GIDSignIn?
     // init
     override func pluginInitialize() {
         // for LINE
@@ -28,9 +28,16 @@ import FBSDKLoginKit
         // for Facebook
         ApplicationDelegate.shared.application(UIApplication.shared, didFinishLaunchingWithOptions: [:])
         
+        // for Google Signin
+        let gid = self.commandDelegate.settings["googleclientid"] as? String;
+        self.googleSignin = GIDSignIn.sharedInstance();
+        
+        self.googleSignin?.clientID = gid;
         
         // notification from appDelegate application
         NotificationCenter.default.addObserver(self, selector: #selector(type(of: self).notifyFromAppDelegate(notification:)), name: Notification.Name.CDVPluginHandleOpenURLWithAppSourceAndAnnotation, object: nil)
+    
+    
 
     }
 
@@ -88,6 +95,22 @@ import FBSDKLoginKit
         LoginManager().logIn(permissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
     }
     
+    // for google
+    @objc func loginWithGoogle(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId;
+        GIDSignIn.sharedInstance().delegate = self;
+        GIDSignIn.sharedInstance().uiDelegate = self;
+        GIDSignIn.sharedInstance().signIn();
+    }
+    // below two function has been needed when login for gogole
+    func sign(_ signIn: GIDSignIn!, dismiss viewController: UIViewController!) {
+        print("dismissing Google SignIn")
+    }
+    
+    func sign(_ signIn: GIDSignIn!, present viewController: UIViewController!) {
+        print("presenting Google SignIn")
+    }
+    
     // Logout
     // If you have been logined once, the accessToken was saved in the device.
     // So if you try to refresh profile, you have to execute 'logout' method.
@@ -136,6 +159,14 @@ import FBSDKLoginKit
         self.commandDelegate.send(result, callbackId:self.callbackId)
     }
     
+    // for logout
+    @objc func logoutWithGoogle(_ command: CDVInvokedUrlCommand) {
+        self.callbackId = command.callbackId
+        self.googleSignin?.signOut()
+        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs:"logouted")
+        self.commandDelegate.send(result, callbackId:self.callbackId)
+    }
+    
     // facebook login handler
     private func fbLoginHandler() -> LoginManagerLoginResultBlock {
         let loginHandler: LoginManagerLoginResultBlock = { (result, error) -> Void in
@@ -167,6 +198,19 @@ import FBSDKLoginKit
         return loginHandler
     }
     
+    // google signin handler
+    func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error!) {
+        if let error = error {
+            let cordovaResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: error.localizedDescription)
+            self.commandDelegate.send(cordovaResult, callbackId:self.callbackId)
+        } else {
+            let res = self.googResponseObject(user);
+            let cordovaResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: res)
+            self.commandDelegate.send(cordovaResult, callbackId:self.callbackId)
+        }
+    }
+    
+    
     private func twResponseObject(_ session:TWTRSession? , _ user:TWTRUser? ) -> Dictionary<String, Any> {
         var data = ["name": nil, "screenName": nil, "userId": nil, "image": nil, "secret": nil, "token": nil] as [String: Any?]
         if let name = user?.name {
@@ -188,7 +232,7 @@ import FBSDKLoginKit
             data.updateValue(token, forKey: "token")
         }
         
-        return data
+        return data;
     }
     
     private func lineResponseObject(result: LoginResult) -> Dictionary<String, String> {
@@ -281,7 +325,47 @@ import FBSDKLoginKit
             return response as Any as! Dictionary<String, Any>
         }
     }
-
+    
+    private func googResponseObject(_ user: GIDGoogleUser ) -> Dictionary<String, String> {
+        var data = [:] as! [String : String];
+        
+        // user Profile
+        if let userId = user.userID {
+            data.updateValue(userId, forKey: "userId")
+        }
+        if let name = user.profile.name {
+            data.updateValue(name, forKey: "name")
+        }
+        if let givenName = user.profile.givenName {
+            data.updateValue(givenName, forKey: "givenName")
+        }
+        if let familyName = user.profile.familyName {
+            data.updateValue(familyName, forKey: "familyName")
+        }
+        if let email = user.profile.email {
+            data.updateValue(email, forKey: "email")
+        }
+        if let image = user.profile.imageURL(withDimension: 320) {
+            data.updateValue(image.absoluteString, forKey: "image")
+        }
+        
+        // Token
+        if let token = user.authentication.idToken {
+            data.updateValue(token, forKey: "token")
+        }
+        if let idToken = user.authentication.idToken {
+            data.updateValue(idToken, forKey: "idToken")
+        }
+        if let refreshToken = user.authentication.refreshToken {
+            data.updateValue(refreshToken, forKey: "refreshtoken")
+        }
+        if let accessToken = user.authentication.accessToken {
+            data.updateValue(accessToken, forKey: "accessToken")
+        }
+        
+        return data;
+    }
+    
     private func topMostController() -> UIViewController {
         var topController:UIViewController  = (UIApplication.shared.keyWindow?.rootViewController)!;
         while ((topController.presentedViewController) != nil) {
@@ -293,11 +377,13 @@ import FBSDKLoginKit
     
     @objc func notifyFromAppDelegate(notification: Notification) {
         if let object = notification.object {
-            let url = ((object as! [String: Any])["url"])!
-            let isFromTwitter = (url as! NSURL).absoluteString!.contains("twitterkit")
-            let isFromLine = (url as! NSURL).absoluteString!.contains("line3rdp")
-            let isFromFacebook = (url as! NSURL).absoluteString!.prefix(2) == "fb";
             
+            let url = ((object as! [String: Any])["url"])!
+            
+            let isFromTwitter = (url as! NSURL).absoluteString!.contains("twitterkit");
+            let isFromLine = (url as! NSURL).absoluteString!.contains("line3rdp");
+            let isFromFacebook = (url as! NSURL).absoluteString!.prefix(2) == "fb";
+            let isFromGoogle = (url as! NSURL).absoluteString!.contains("com.googleusercontent");
             
             let sourceApplication = ((object as! [String: Any])["sourceApplication"])!
             let annotation = ((object as! [String: Any])["annotation"])
@@ -324,6 +410,9 @@ import FBSDKLoginKit
             
             if isFromFacebook {
                 ApplicationDelegate.shared.application(UIApplication.shared, open: url as! URL, sourceApplication: sourceApplication as? String, annotation: options[UIApplication.OpenURLOptionsKey.openInPlace])
+            }
+            if isFromGoogle {
+                GIDSignIn.sharedInstance().handle(url as? URL, sourceApplication: sourceApplication as? String, annotation: annotation);
             }
         }
     }

@@ -19,6 +19,8 @@
   <preference name="FACEBOOK_APP_ID" default="defaultValue" />
   <preference name="FACEBOOK_APP_NAME" default="defaultValue" />
 
+  <preference name="GOOGLE_CLIENT_ID" default="defaultValue" />
+  <preference name="GOOGLE_REVERSED_CLIENT_ID" default="defaultValue" />
   <!-- iOS -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
@@ -30,6 +32,10 @@
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
       <preference name="LINECHANNELID" value="$LINE_CHANNEL_ID" />
+      
+      <preference name="GoogleClientId" value="$GOOGLE_CLIENT_ID" />
+      <preference name="GoogleReversedClientId" value="$GOOGLE_REVERSED_CLIENT_ID" />
+      
       <preference name="deployment-target" value="10.0" />
     </config-file>
 
@@ -49,6 +55,7 @@
             <string>$LINE_BUNDLE_ID</string>
             <string>twitterkit-$TWITTER_KEY</string>
             <string>fb$FACEBOOK_APP_ID</string>
+            <string>$GOOGLE_REVERSED_CLIENT_ID</string>
           </array>
           <key>FacebookAppID</key>
           <string>$FACEBOOK_APP_ID</string>
@@ -85,6 +92,7 @@
     <pod id="GXTwitterKit" version="~>3.4.5" />
     <pod id="FBSDKLoginKit" version="~> 5.0" />
     <pod id="LineSDKSwift" version="~> 5.1" />
+    <pod id="GoogleSignIn" version="~> 4.4" />
 
     <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
     <preference name="UseSwiftLanguageVersion" default="4" />
