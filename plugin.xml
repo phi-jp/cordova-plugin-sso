@@ -21,6 +21,8 @@
 
   <preference name="GOOGLE_CLIENT_ID" default="defaultValue" />
   <preference name="GOOGLE_REVERSED_CLIENT_ID" default="defaultValue" />
+  <preference name="GOOGLE_WEB_OAUTH_CLIENT_ID" default="defaultValue" />
+
   <!-- iOS -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
@@ -35,6 +37,7 @@
       
       <preference name="GoogleClientId" value="$GOOGLE_CLIENT_ID" />
       <preference name="GoogleReversedClientId" value="$GOOGLE_REVERSED_CLIENT_ID" />
+      <preference name="GoogleWebOAuthClientId" value="$GOOGLE_WEB_OAUTH_CLIENT_ID" />
       
       <preference name="deployment-target" value="10.0" />
     </config-file>
@@ -141,17 +144,19 @@
       <preference name="TwitterConsumerKey" value="$TWITTER_KEY" />
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
       <preference name='LineChannelId' value='$LINE_CHANNEL_ID'/>
+      <preference name="GoogleWebOAuthClientId" value="$GOOGLE_WEB_OAUTH_CLIENT_ID" />
     </config-file>
 
     <source-file src="src/android/Sso.java" target-dir="src/com/singlesignon" />
 
     <framework src="com.facebook.android:facebook-android-sdk:4.+"/>
     <framework src="src/android/twitter/twitter.gradle" custom="true" type="gradleReference" />
+    <framework src="com.google.android.gms:play-services-auth:17.0.0"/>
+
     <source-file src="src/android/twitter/UserShowServiceApi.java" target-dir="src/com/singlesignon" />
     <lib-file src="src/android/line/line-sdk-4.0.5.aar" />
 
     <framework src="src/android/line/line.gradle" custom="true" type="gradleReference" />
-    
   </platform>
 
 </plugin>

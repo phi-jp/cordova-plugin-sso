@@ -1,5 +1,11 @@
 package com.singlesignon;
 
+import com.google.android.gms.auth.api.*;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.linecorp.linesdk.LineApiResponseCode;
@@ -8,6 +14,7 @@ import com.linecorp.linesdk.api.LineApiClient;
 import com.linecorp.linesdk.api.LineApiClientBuilder;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
+
 
 import com.twitter.sdk.android.core.*;
 import com.twitter.sdk.android.core.identity.TwitterAuthClient;
@@ -72,7 +79,7 @@ import android.content.pm.Signature;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -101,12 +108,27 @@ public class Sso extends CordovaPlugin {
 	private CallbackContext callbackContext;
 	private CallbackManager fbCallbackManager;
 	private LineApiClient lineApiClient;
+	private GoogleSignInClient mGoogleSignInClient;
 
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+		// initialize twitter
 		TwitterConfig config = new TwitterConfig.Builder(cordova.getActivity().getApplicationContext())
     		.twitterAuthConfig(new TwitterAuthConfig(getTwitterKey(), getTwitterSecret()))
     		.build();
 		Twitter.initialize(config);
+
+		// initialize Google Sign IN
+		String google_client_id = preferences.getString("GoogleWebOAuthClientId", "");
+		if (google_client_id != "" ) {
+			GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().requestIdToken(google_client_id).build();
+			Context context = this.cordova.getActivity().getApplicationContext();
+			mGoogleSignInClient = GoogleSignIn.getClient(context, gso);
+		}
+
+		// get acount
+		//		GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(context);
+
+
 	}
 
 	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -147,6 +169,16 @@ public class Sso extends CordovaPlugin {
 			logoutWithFacebook(activity, callbackContext);
 			return true;
 		}
+		else if (action.equals("loginWithGoogle")) {
+			cordova.setActivityResultCallback(this);
+			loginWithGoogle(activity, callbackContext);
+			return true;
+		}
+		else if (action.equals("logoutWithGoogle")) {
+			cordova.setActivityResultCallback(this);
+			logoutWithGoogle(activity, callbackContext);
+			return true;
+		}
 		else
 		{
 			return false;
@@ -171,6 +203,12 @@ public class Sso extends CordovaPlugin {
 		}
 		else if (action.equals("loginWithFacebook")) {
 			fbCallbackManager.onActivityResult(requestCode, resultCode, intent);
+		}
+		else if (action.equals("loginWithGoogle")) {
+			if (intent != null) {
+				Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
+				handleGoogleSigninResult(task);
+			}
 		}
 	}
 
@@ -257,6 +295,11 @@ public class Sso extends CordovaPlugin {
 		});
 	}
 
+	private void loginWithGoogle(final Activity activity, final CallbackContext callbackContext) {
+		Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+		this.cordova.startActivityForResult((CordovaPlugin) this, signInIntent, 0);
+	}
+
 	private void logoutWithTwitter(final Activity activity, final CallbackContext callbackContext) {
 		cordova.getThreadPool().execute(new Runnable() {
 			@Override
@@ -289,6 +332,15 @@ public class Sso extends CordovaPlugin {
 		}
 	}
 
+	private void logoutWithGoogle(final Activity activity, final CallbackContext callbackContext) {
+		mGoogleSignInClient.signOut().addOnCompleteListener(activity, new OnCompleteListener<Void>() {
+			@Override
+			public void onComplete(@NonNull Task<Void> task) {
+				callbackContext.success("logout");
+			}
+		});
+	}
+
 	private String getTwitterKey() {
 		return preferences.getString("TwitterConsumerKey", "");
 	}
@@ -300,7 +352,6 @@ public class Sso extends CordovaPlugin {
 	private String getLineChannelId() {
 		return preferences.getString("LineChannelId", "");
 	}
-
 
 	private JSONObject TwitterUserObjectToJSON(User user) {
 		Gson gson = new Gson();
@@ -334,7 +385,6 @@ public class Sso extends CordovaPlugin {
 	private JSONObject getLineBaseUserData(LineLoginResult result) {
 		JSONObject jsonUser = new JSONObject();
 		LineProfile profile = result.getLineProfile();
-
 		try {
 			jsonUser.put("name", profile.getDisplayName());
 			jsonUser.put("userId", profile.getUserId());
@@ -366,6 +416,25 @@ public class Sso extends CordovaPlugin {
 		return jsonUser;
 	}
 
+	private JSONObject getGoogleBaseUserData(GoogleSignInAccount account) {
+		Uri imageUri = account.getPhotoUrl();
+		JSONObject jsonUser = new JSONObject();
+		try {
+			jsonUser.put("name", account.getDisplayName());
+			jsonUser.put("first_name", account.getGivenName());
+			jsonUser.put("last_name", account.getFamilyName());
+			jsonUser.put("token", account.getIdToken());
+			jsonUser.put("userId", account.getId());
+			jsonUser.put("image", account.getPhotoUrl());
+			jsonUser.put("email", account.getEmail());
+		}
+		catch(JSONException e) {
+			e.printStackTrace();
+		}
+
+		return jsonUser;
+	}
+
 	private JSONObject TweetObjectToJSON(Tweet tweet) {
 		Gson gson = new Gson();
 		String jsonString = gson.toJson(tweet);
@@ -385,6 +454,16 @@ public class Sso extends CordovaPlugin {
 		twitterLoginButton.onActivityResult(requestCode, resultCode, intent);
 	}
 
+	private void handleGoogleSigninResult(Task<GoogleSignInAccount> completedTask) {
+		try {
+			GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+			JSONObject result = this.getGoogleBaseUserData(account);
+			callbackContext.success(result);
+		}
+		catch(ApiException e) {
+			callbackContext.error("Failed google signin {e.toString()}");
+		}
+	}
 
 	private boolean fbHasAccessToken() {
 		return AccessToken.getCurrentAccessToken() != null;
@@ -400,6 +479,4 @@ public class Sso extends CordovaPlugin {
 		reader.close();
 		return sb.toString();
 	}
-
-
 }
