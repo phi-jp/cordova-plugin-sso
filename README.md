@@ -24,13 +24,19 @@ $ cordova plguin add cordova-plugin-sso --variable TWITTER_KEY=XXXX --variable T
 And add config.xml below code
 
 ```xml
-<plugin name="cordova-plugin-sso" spec="0.2.1">
+<plugin name="cordova-plugin-sso" spec="0.2.2">
     <variable name="LINE_BUNDLE_ID" value="line3rdp.[YOUR BUNDLE ID]" />
     <variable name="LINE_CHANNEL_ID" value=[LINE_CHANNLE_ID] />
     <variable name="TWITTER_KEY" value=[Twitter Consumer Key] />
     <variable name="TWITTER_SECRET" value=[Twitter Consumer Secret] />
     <variable name="FACEBOOK_APP_ID" value=[Facebook app id] />
     <variable name="FACEBOOK_APP_NAME" value=[Facebook app name] />
+
+    <!-- Google signin iOS-->
+    <variable name="GOOGLE_CLIENT_ID" value="426376846835-mlvbbgm7njiaqnt9d9k1i3v1tbb3sieq.apps.googleusercontent.com" />
+    <variable name="GOOGLE_REVERSED_CLIENT_ID" value="com.googleusercontent.apps.426376846835-mlvbbgm7njiaqnt9d9k1i3v1tbb3sieq" />
+    <!-- Google signin Android-->
+    <variable name="GOOGLE_WEB_OAUTH_CLIENT_ID" value="426376846835-09m1vk5faq5m480ov06lbsedpbuldjpj.apps.googleusercontent.com"/>
 </plugin>
 
 ```
