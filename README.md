@@ -159,5 +159,10 @@ if (window.sso) {
 - Using NotificationCenter and Removing app delegat
 - remove Google signin
 
-#### Android
+##### Android
 - remove Google signin
+
+
+#### 0.2.2 
+
+Google sign in (android and ios)
