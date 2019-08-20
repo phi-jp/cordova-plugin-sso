@@ -2,7 +2,6 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-sso" version="0.2.2">
   <name>Sso</name>
   <description>Single Sign On Plugin</description>
-  <dependency id="cordova-plugin-cocoapod-support" url="https://github.com/snuffy/cordova-plugin-cocoapods-support" />
 	<engines>
 		<engine name="cordova-android" version=">=7.1.0" />
 	</engines>
@@ -90,13 +89,18 @@
 
     <source-file src="src/ios/sso.swift" />
     <source-file src="src/ios/Sso-Bridging-Header.h" />
-
-    <pods-config use-frameworks="true" />
-    <pod id="GXTwitterKit" version="~>3.4.5" />
-    <pod id="FBSDKLoginKit" version="~> 5.0" />
-    <pod id="LineSDKSwift" version="~> 5.1" />
-    <pod id="GoogleSignIn" version="~> 4.4" />
-
+    
+    <podspec>
+      <config>
+        <source url="https://github.com/CocoaPods/Specs.git"/>
+      </config>
+      <pods use-frameworks="true">
+        <pod name="GXTwitterKit" spec="~>3.4.5"/>
+        <pod name="FBSDKLoginKit" spec="~> 5.0" />
+        <pod name="LineSDKSwift" spec="~> 5.1" />
+        <pod name="GoogleSignIn" spec="~> 4.4" />
+      </pods>
+    </podspec>
     <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
     <preference name="UseSwiftLanguageVersion" default="4" />
   </platform>
