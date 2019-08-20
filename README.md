@@ -166,3 +166,7 @@ if (window.sso) {
 #### 0.2.2 
 
 Google sign in (android and ios)
+
+### 0.2.3
+
+remove dependency of cordova plugin cocoapods
