@@ -95,14 +95,14 @@
         <source url="https://github.com/CocoaPods/Specs.git"/>
       </config>
       <pods use-frameworks="true">
-        <pod name="GXTwitterKit" spec="~>3.4.5"/>
         <pod name="FBSDKLoginKit" spec="~> 5.0" />
         <pod name="LineSDKSwift" spec="~> 5.1" />
         <pod name="GoogleSignIn" spec="~> 4.4" />
+        <pod name="TwitterKit5" spec="~> 5.0.1" />
       </pods>
     </podspec>
     <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
-    <preference name="UseSwiftLanguageVersion" default="4" />
+    <preference name="UseSwiftLanguageVersion" default="5" />
   </platform>
 
   <!-- Android -->
