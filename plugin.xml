@@ -98,7 +98,7 @@
         <pod name="FBSDKLoginKit" spec="~> 5.0" />
         <pod name="LineSDKSwift" spec="~> 5.1" />
         <pod name="GoogleSignIn" spec="~> 4.4" />
-        <pod name="TwitterKit5" spec="~> 5.0.1" />
+        <pod name="GXTwitterKit" spec="~>3.4.5"/>
       </pods>
     </podspec>
     <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
@@ -162,5 +162,4 @@
 
     <framework src="src/android/line/line.gradle" custom="true" type="gradleReference" />
   </platform>
-
 </plugin>
