@@ -1,6 +1,5 @@
 # cordova-plugin-sso
 
-
 ## What ?
 
 If you use this plugin, you can be available for realizing SSO (Single Sign On) at Twitter, Facebook and LINE
@@ -15,7 +14,7 @@ $ gem install cocoapods
 $ pod setup
 ```
 
-and Install 
+and Install
 
 ```
 $ cordova plguin add cordova-plugin-sso --variable TWITTER_KEY=XXXX --variable TWITTER_SECRET=XXXX
@@ -33,17 +32,17 @@ And add config.xml below code
     <variable name="FACEBOOK_APP_NAME" value=[Facebook app name] />
 
     <!-- Google signin iOS-->
-    <variable name="GOOGLE_CLIENT_ID" value="426376846835-mlvbbgm7njiaqnt9d9k1i3v1tbb3sieq.apps.googleusercontent.com" />
-    <variable name="GOOGLE_REVERSED_CLIENT_ID" value="com.googleusercontent.apps.426376846835-mlvbbgm7njiaqnt9d9k1i3v1tbb3sieq" />
+    <variable name="GOOGLE_CLIENT_ID" value="[clinet_id]" />
+    <variable name="GOOGLE_REVERSED_CLIENT_ID" value="[reverse_clinet_id]" />
     <!-- Google signin Android-->
-    <variable name="GOOGLE_WEB_OAUTH_CLIENT_ID" value="426376846835-09m1vk5faq5m480ov06lbsedpbuldjpj.apps.googleusercontent.com"/>
+    <variable name="GOOGLE_WEB_OAUTH_CLIENT_ID" value="[outh clinet]"/>
 </plugin>
 
 ```
 
 this plugin
 
-## Service Settings 
+## Service Settings
 
 ### LINE
 
@@ -57,7 +56,6 @@ $ keytool -exportcert -alias androiddebugkey -keystore .keystore | openssl sha1 
 
 ### Facebook
 
-
 #### for iOS
 
 To get client id & reversed client id, you have to register your project to Google firebase console.
@@ -67,7 +65,6 @@ https://developers.google.com/identity/sign-in/ios/sdk/
 As regster your appliction, you get GoogleService-Info.plist.
 
 You can see client id & reversed client id on the text editor.
-
 
 #### for Android
 
@@ -81,11 +78,7 @@ If your project is only debug, only you have to do is entering below code on the
 
 `keytool -exportcert -keystore ~/.android/debug.keystore -list -v`
 
-
-
 ## Usage
-
-
 
 ### Available Service
 
@@ -97,32 +90,32 @@ If your project is only debug, only you have to do is entering below code on the
 
 ```javascript
 if (window.sso) {
-  sso.twitter.login(function(result) {
-    // success
-    var data = {
-      name: result.name,
-      id: result.userId,
-      token: result.token,
-      image: result.image
-    };
-
-  }, function(error) {
-    // error
-    console.log(error);
-  });
+  sso.twitter.login(
+    function(result) {
+      // success
+      var data = {
+        name: result.name,
+        id: result.userId,
+        token: result.token,
+        image: result.image
+      };
+    },
+    function(error) {
+      // error
+      console.log(error);
+    }
+  );
 }
 ```
 
 ### Available Parameter
 
-
 Every service has below parameters
 
-- name 
+- name
 - userId
 - token
 - image
-
 
 Optional parameters below
 
@@ -131,16 +124,18 @@ Optional parameters below
 If you have been logined once, the accessToken was saved in the device.
 So if you want to get the Token, profile, or etc.. from the beginning, you have to execute 'logout' method.
 
-
 ```javascript
 if (window.sso) {
-  sso.twitter.logout(function(message) {
-    // success
-    console.log(message) // -> display logout
-  }, function(error) {
-    // error
-    console.log(error);
-  });
+  sso.twitter.logout(
+    function(message) {
+      // success
+      console.log(message); // -> display logout
+    },
+    function(error) {
+      // error
+      console.log(error);
+    }
+  );
 }
 ```
 
@@ -151,19 +146,20 @@ if (window.sso) {
 ##### iOS
 
 - Using cocoapods
-- Updating all iOS SDK (Twitter Facebook LINE) 
-  - TwitterKit:  3.4.0
+- Updating all iOS SDK (Twitter Facebook LINE)
+
+  - TwitterKit: 3.4.0
   - FBSDKLoginKit: 4.38
-  - LineSDKSwift:  5.0
+  - LineSDKSwift: 5.0
 
 - Using NotificationCenter and Removing app delegat
 - remove Google signin
 
 ##### Android
+
 - remove Google signin
 
-
-#### 0.2.2 
+#### 0.2.2
 
 Google sign in (android and ios)
 
