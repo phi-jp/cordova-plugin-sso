@@ -88,11 +88,10 @@ import GoogleSignIn
     // for Facebook
     @objc func loginWithFacebook(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId
-        
         // Logout before login
         let loginManger = LoginManager();
         loginManger.logOut();
-        LoginManager().logIn(permissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler())
+        LoginManager().logIn(permissions: ["public_profile"], from: self.topMostController(), handler: self.fbLoginHandler(cordovaCallbackId: command.callbackId))
     }
     
     // for google
@@ -168,7 +167,7 @@ import GoogleSignIn
     }
     
     // facebook login handler
-    private func fbLoginHandler() -> LoginManagerLoginResultBlock {
+    private func fbLoginHandler(cordovaCallbackId: String) -> LoginManagerLoginResultBlock {
         let loginHandler: LoginManagerLoginResultBlock = { (result, error) -> Void in
             if (error != nil) {
                 // If the SDK has a message for the user, surface it.
@@ -182,17 +181,53 @@ import GoogleSignIn
                 self.commandDelegate.send(result, callbackId:self.callbackId)
             }
             else {
-                let res = self.fbResponseObject();
-    
-                if (res["status"] as! String == "connected") {
-                    let sendData = res["authResponse"]
-                    let cordovaResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: sendData as! [AnyHashable : Any])
-                    self.commandDelegate.send(cordovaResult, callbackId:self.callbackId)
+                let token = AccessToken.current
+                let expiresTimeInterval = token?.expirationDate.timeIntervalSinceNow
+                var expiresIn = "0"
+                
+                if (expiresTimeInterval! > 0) {
+                    expiresIn = NSString(format: "%0.0f", expiresTimeInterval!) as String
                 }
-                else {
-                    let cordovaResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "occur error when get User data")
-                    self.commandDelegate.send(cordovaResult, callbackId:self.callbackId)
+                var responseAuth:Dictionary<String, Any> = [
+                    "name": "",
+                    "image": "",
+                    "first_name": "",
+                    "last_name": "",
+                    "token": token?.tokenString as Any,
+                    "expiresIn": expiresIn,
+                    "secret": "...",
+                    "session_key" : true,
+                    "sig": "...",
+                    "userId" : token?.userID as Any,
+                ]
+
+                Profile.loadCurrentProfile { (profile, error) in
+                    var profileError: Error
+                    if (error != nil) {
+                        profileError = error!
+                    }
+                    else {
+                        if let firstname = profile?.firstName, let lastname = profile?.lastName {
+                            let name = firstname + lastname
+                            responseAuth.updateValue(name, forKey: "name")
+                        }
+                        if let firstname = profile?.firstName {
+                            responseAuth.updateValue(firstname, forKey: "first_name")
+                        }
+                        if let lastName = profile?.lastName {
+                            responseAuth.updateValue(lastName, forKey: "last_name")
+                        }
+                        if (profile != nil) {
+                            let image:String? = profile?.imageURL(forMode: Profile.PictureMode.square, size: CGSize(width: 1280, height: 1280))?.absoluteString
+                            responseAuth.updateValue(image as Any, forKey: "image")
+                        }
+                        
+                        let sendData = responseAuth
+                        let cordovaResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: sendData as! [AnyHashable : Any])
+                        self.commandDelegate.send(cordovaResult, callbackId:self.callbackId)
+                    }
                 }
+                
             }
         }
         return loginHandler
@@ -254,76 +289,6 @@ import GoogleSignIn
         data.updateValue(result.accessToken.value, forKey: "token")
 
         return data
-    }
-    
-    private func fbResponseObject() -> Dictionary<String, Any> {
-        
-        if (!(AccessToken.current != nil)) {
-            return [ "status": "unknown" ]
-        }
-        
-        var response:Dictionary = ["status" : nil, "authResponse": nil] as [String : Any?]
-        
-        
-        let token = AccessToken.current
-        let expiresTimeInterval = token?.expirationDate.timeIntervalSinceNow
-        var expiresIn = "0"
-
-        if (expiresTimeInterval! > 0) {
-            expiresIn = NSString(format: "%0.0f", expiresTimeInterval!) as String
-        }
-        var responseAuth:Dictionary<String, Any> = [
-            "name": "",
-            "image": "",
-            "first_name": "",
-            "last_name": "",
-            "token": token?.tokenString as Any,
-            "expiresIn": expiresIn,
-            "secret": "...",
-            "session_key" : true,
-            "sig": "...",
-            "userId" : token?.userID as Any,
-        ]
-        
-        var keepAlive = true
-        let runRoop = RunLoop.current
-        var profileError:Error?
-    
-        Profile.loadCurrentProfile { (profile, error) in
-            if (error != nil) {
-                profileError = error
-            }
-            else {
-                if let firstname = profile?.firstName, let lastname = profile?.lastName {
-                    let name = firstname + lastname
-                    responseAuth.updateValue(name, forKey: "name")
-                }
-                if let firstname = profile?.firstName {
-                    responseAuth.updateValue(firstname, forKey: "first_name")
-                }
-                if let lastName = profile?.lastName {
-                    responseAuth.updateValue(lastName, forKey: "last_name")
-                }
-                if (profile != nil) {
-                    let image:String? = profile?.imageURL(forMode: Profile.PictureMode.square, size: CGSize(width: 320, height: 320))?.absoluteString
-                    responseAuth.updateValue(image as Any, forKey: "image")
-                }
-            }
-            keepAlive = false
-        }
-
-        while keepAlive && runRoop.run(mode: .defaultRunLoopMode, before: NSDate(timeIntervalSinceNow: 0.1) as Date) {
-            //wait...
-        }
-
-        if (profileError != nil) {
-            return [ "status": "unknown" ]
-        }
-        else {
-            response.updateValue("connected", forKey: "status")
-            response.updateValue(responseAuth, forKey: "authResponse")
-            return response as Any as! Dictionary<String, Any>
-        }
     }
     
     private func googResponseObject(_ user: GIDGoogleUser ) -> Dictionary<String, String> {
