@@ -1,8 +1,8 @@
 {
   "name": "cordova-plugin-sso",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "cordova-plugin-sso",
-  "cordova" : {
+  "cordova": {
     "id": "cordova-plugin-sso",
     "platforms": [
       "android",

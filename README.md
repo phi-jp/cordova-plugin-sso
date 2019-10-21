@@ -166,3 +166,7 @@ Google sign in (android and ios)
 ### 0.2.3
 
 remove dependency of cordova plugin cocoapods
+
+### 0.2.4
+
+bugfix facebook login
