@@ -232,8 +232,8 @@ public class Sso extends CordovaPlugin {
 										Log.v(LOG_TAG, "ShowUser API call successful!");
 										JSONObject jsonUser = TwitterUserObjectToJSON(result.data);
 										try {
-												jsonUser.put("token", loginResult.data.getAuthToken().secret);
-												jsonUser.put("secret", loginResult.data.getAuthToken().token);
+												jsonUser.put("token", loginResult.data.getAuthToken().token);
+												jsonUser.put("secret", loginResult.data.getAuthToken().secret);
 										}
 										catch (JSONException e) {
 												e.printStackTrace();
