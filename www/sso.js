@@ -34,7 +34,16 @@ var Sso = {
     logout: function(onSuccess, onFail, param) {
       return exec(onSuccess, onFail, 'Sso', 'logoutWithGoogle',[param]);
     },
+  },
+  apple: {
+    login: function(onSuccess, onFail, param) {
+      return exec(onSuccess, onFail, 'Sso', 'signInWithApple',[param]);
+    },
+    logout: function(onSuccess, onFail, param) {
+      // no method 
+    }
   }
+
 
 };
 module.exports = Sso;
