@@ -4,8 +4,9 @@ import TwitterKit
 import FBSDKCoreKit
 import FBSDKLoginKit
 import GoogleSignIn
+import AuthenticationServices
 
-@objc(Sso) class Sso :CDVPlugin, GIDSignInDelegate, GIDSignInUIDelegate {
+@objc(Sso) class Sso :CDVPlugin, GIDSignInDelegate, GIDSignInUIDelegate, ASAuthorizationControllerDelegate {
 
     
     var callbackId:String?
@@ -108,6 +109,64 @@ import GoogleSignIn
     
     func sign(_ signIn: GIDSignIn!, present viewController: UIViewController!) {
         print("presenting Google SignIn")
+    }
+    
+    @objc func signInWithApple(_ command: CDVInvokedUrlCommand){
+        if #available(iOS 13, *) {
+            self.callbackId = command.callbackId
+            let provider:ASAuthorizationAppleIDProvider = ASAuthorizationAppleIDProvider.init();
+            let request: ASAuthorizationAppleIDRequest = provider.createRequest()
+            request.requestedScopes = [.fullName, .email];
+            let controller: ASAuthorizationController = ASAuthorizationController.init(authorizationRequests: [request])
+            controller.delegate = self
+            controller.performRequests()
+        }
+        else {
+            let result: CDVPluginResult = CDVPluginResult.init(status: CDVCommandStatus.error, messageAs: "not available singin with apple on your device")
+            self.commandDelegate.send(result, callbackId: command.callbackId)
+        }
+    }
+    
+    @available(iOS 13.0, *)
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+            var data = [:] as! [String : Any]
+            var name = [:] as! [String : String]
+            let token = appleIDCredential.identityToken ?? Data.init(capacity: 0);
+            let authorizationCode = appleIDCredential.authorizationCode ?? Data.init(capacity: 0)
+            let fullname = appleIDCredential.fullName;
+            
+            data.updateValue(appleIDCredential.email ?? "", forKey: "email")
+            data.updateValue(appleIDCredential.state ?? "", forKey: "state")
+            data.updateValue(appleIDCredential.user, forKey: "user")
+            data.updateValue(String(data: authorizationCode, encoding: String.Encoding.utf8), forKey: "authorizationCode")
+            data.updateValue(String(data: token, encoding: String.Encoding.utf8)!, forKey: "token")
+            
+            if fullname != nil {
+                name.updateValue(fullname?.givenName ?? "", forKey: "given_name")
+                name.updateValue(fullname?.middleName ?? "", forKey: "middle_name")
+                name.updateValue(fullname?.familyName ?? "", forKey: "family_name")
+                name.updateValue(fullname?.namePrefix ?? "", forKey: "name_prefix")
+                name.updateValue(fullname?.nameSuffix ?? "", forKey: "name_suffix")
+                name.updateValue(fullname?.nickname ?? "", forKey: "nickname")
+            }
+            
+            data.updateValue(name, forKey: "name");
+            
+            let result = CDVPluginResult(status: CDVCommandStatus.ok, messageAs: data);
+            self.commandDelegate.send(result, callbackId: self.callbackId);
+        }
+    }
+    
+    @available(iOS 13, *)
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        let data = [
+            "error": "ASAUTHORIZATION_ERROR",
+            "localizedDescription": error.localizedDescription,
+        ]
+
+        let result = CDVPluginResult(status: CDVCommandStatus.error, messageAs: data);
+        self.commandDelegate.send(result, callbackId: self.callbackId);
     }
     
     // Logout
