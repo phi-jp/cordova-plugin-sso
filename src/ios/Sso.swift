@@ -400,44 +400,56 @@ import AuthenticationServices
     }
     
     @objc func notifyFromAppDelegate(notification: Notification) {
-        if let object = notification.object {
-            
-            let url = ((object as! [String: Any])["url"])!
-            
-            let isFromTwitter = (url as! NSURL).absoluteString!.contains("twitterkit");
-            let isFromLine = (url as! NSURL).absoluteString!.contains("line3rdp");
-            let isFromFacebook = (url as! NSURL).absoluteString!.prefix(2) == "fb";
-            let isFromGoogle = (url as! NSURL).absoluteString!.contains("com.googleusercontent");
-            
-            let sourceApplication = ((object as! [String: Any])["sourceApplication"])!
-            let annotation = ((object as! [String: Any])["annotation"])
-            var options:[UIApplication.OpenURLOptionsKey:Any] = [:]
-            
-            options[UIApplication.OpenURLOptionsKey.sourceApplication] = sourceApplication
-            
-            if let an = annotation {
-                options[UIApplication.OpenURLOptionsKey.openInPlace] = an
-                return
-            }
-            else {
-                options[UIApplication.OpenURLOptionsKey.openInPlace] = 0
-            }
-            
-            
-            if isFromTwitter {
-                TWTRTwitter().application(UIApplication.shared, open: url as! URL, options: options)
-            }
-
-            if isFromLine {
-                LoginManager.shared.application(UIApplication.shared, open: url as? URL, options: options)  
-            }
-            
-            if isFromFacebook {
-                ApplicationDelegate.shared.application(UIApplication.shared, open: url as! URL, sourceApplication: sourceApplication as? String, annotation: options[UIApplication.OpenURLOptionsKey.openInPlace])
-            }
-            if isFromGoogle {
-                GIDSignIn.sharedInstance().handle(url as? URL, sourceApplication: sourceApplication as? String, annotation: annotation);
-            }
+        guard  let object = notification.object as? [String:Any],
+            let url = object["url"] as? URL else { return }
+    
+        let isFromTwitter = url.absoluteString.contains("twitterkit")
+        let isFromLine = url.absoluteString.contains("line3rdp")
+        let isFromFacebook = url.absoluteString.prefix(2) == "fb"
+        let isFromGoogle = url.absoluteString.contains("com.googleusercontent")
+        
+        var options:[UIApplication.OpenURLOptionsKey:Any] = [:]
+        
+        var sourceApplication: String
+        if let sa = object["sourceApplication"] as? String {
+            sourceApplication = sa
+        } else {
+            sourceApplication = ""
+        }
+        options[UIApplication.OpenURLOptionsKey.sourceApplication] = sourceApplication
+        
+        let an = object["annotation"]
+        if an != nil {
+            options[UIApplication.OpenURLOptionsKey.openInPlace] = an
+        } else {
+            options[UIApplication.OpenURLOptionsKey.openInPlace] = 0
+        }
+        
+        // twitter 用
+        if isFromTwitter {
+            TWTRTwitter().application(UIApplication.shared,
+                                      open: url,
+                                      options: options)
+        }
+        
+        // line 用
+        if isFromLine {
+            _ = LoginManager.shared.application(UIApplication.shared, open: url, options: options)
+        }
+        
+        // facebook 用
+        if isFromFacebook {
+            ApplicationDelegate.shared.application(UIApplication.shared,
+                                                   open: url,
+                                                   sourceApplication: sourceApplication,
+                                                   annotation: options[UIApplication.OpenURLOptionsKey.openInPlace])
+        }
+        
+        // google 用
+        if isFromGoogle {
+            GIDSignIn.sharedInstance().handle(url,
+                                              sourceApplication: sourceApplication,
+                                              annotation: an);
         }
     }
 }
