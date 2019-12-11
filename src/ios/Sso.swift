@@ -427,6 +427,9 @@ import AuthenticationServices
         
         // twitter 用
         if isFromTwitter {
+            if (sourceApplication == "") {
+                options[UIApplication.OpenURLOptionsKey.sourceApplication] = "com.twitter"
+            }
             TWTRTwitter().application(UIApplication.shared,
                                       open: url,
                                       options: options)
