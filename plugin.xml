@@ -37,6 +37,9 @@
       <preference name="GoogleClientId" value="$GOOGLE_CLIENT_ID" />
       <preference name="GoogleReversedClientId" value="$GOOGLE_REVERSED_CLIENT_ID" />
       <preference name="GoogleWebOAuthClientId" value="$GOOGLE_WEB_OAUTH_CLIENT_ID" />
+
+      <preference name="FacebookAppId" value="$FACEBOOK_APP_ID" />
+      <preference name="FacebookAppName" value="$FACEBOOK_APP_NAME" />
       
       <preference name="deployment-target" value="10.0" />
     </config-file>
@@ -120,13 +123,6 @@
       <preference name="android-minSdkVersion" value="19" />
     </config-file>
 
-    <source-file src="src/android/facebook/facebooksettings.xml" target-dir="res/values" />
-
-    <config-file target="/app/src/main/res/values/facebooksettings.xml" parent="/*">
-        <string name="fb_app_id">$FACEBOOK_APP_ID</string>
-        <string name="fb_app_name">$FACEBOOK_APP_NAME</string>
-    </config-file>
-
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
     </config-file>
@@ -137,11 +133,12 @@
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
-      <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id"/>
-      <meta-data android:name="com.facebook.sdk.ApplicationName" android:value="@string/fb_app_name" />
-      <activity android:name="com.facebook.FacebookActivity"
-        android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-        android:label="@string/fb_app_name" />
+      <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
+    </config-file>
+
+    <config-file target="res/values/strings.xml" parent="/resources">
+      <string name="fb_app_id">$FACEBOOK_APP_ID</string>
+      <string name="fb_app_name">$FACEBOOK_APP_NAME</string>
     </config-file>
 
     <config-file target="res/xml/config.xml" parent="/*">
@@ -149,6 +146,8 @@
       <preference name="TwitterConsumerSecret" value="$TWITTER_SECRET" />
       <preference name='LineChannelId' value='$LINE_CHANNEL_ID'/>
       <preference name="GoogleWebOAuthClientId" value="$GOOGLE_WEB_OAUTH_CLIENT_ID" />
+      <preference name="FacebookAppId" value="$FACEBOOK_APP_ID" />
+      <preference name="FacebookAppName" value="$FACEBOOK_APP_NAME" />
     </config-file>
 
     <source-file src="src/android/Sso.java" target-dir="src/com/singlesignon" />
