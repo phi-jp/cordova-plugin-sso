@@ -339,8 +339,7 @@ public class Sso extends CordovaPlugin {
 
     private JSONObject getFacebookBaseUserData(LoginResult result) {
         Profile profile = Profile.getCurrentProfile();
-        Uri imageUri = Uri.parse(profile.getProfilePictureUri(320, 320).toString());
-
+        Uri imageUri = profile.getProfilePictureUri(320,320);
         JSONObject jsonUser = new JSONObject();
         try {
             jsonUser.put("name", profile.getName());
@@ -348,8 +347,9 @@ public class Sso extends CordovaPlugin {
             jsonUser.put("last_name", profile.getLastName());
             jsonUser.put("token", result.getAccessToken().getToken());
             jsonUser.put("userId", result.getAccessToken().getUserId());
-            jsonUser.put("image", imageUri.toString());
-
+            if (imageUri != null) {
+                jsonUser.put("image", imageUri.toString());
+            } 
         } catch (JSONException e) {
             e.printStackTrace();
         }
