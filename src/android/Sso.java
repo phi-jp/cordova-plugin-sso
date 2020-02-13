@@ -12,6 +12,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -66,6 +67,7 @@ public class Sso extends CordovaPlugin {
     private CallbackManager fbCallbackManager;
     private LineApiClient lineApiClient;
     private GoogleSignInClient mGoogleSignInClient;
+    private ProfileTracker mProfileTracker;
 
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         // initialize twitter
@@ -214,13 +216,27 @@ public class Sso extends CordovaPlugin {
             @Override
             public void run() {
                 fbCallbackManager = CallbackManager.Factory.create();
+
                 LoginManager loginManager = LoginManager.getInstance();
                 loginManager.registerCallback(fbCallbackManager, new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
-                        JSONObject result = getFacebookBaseUserData(loginResult);
-
-                        callbackContext.success(result);
+                        // for profile
+                        Profile profile = Profile.getCurrentProfile();
+                        if (profile == null) {
+                            mProfileTracker = new ProfileTracker() {
+                                @Override
+                                protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+                                    Log.v("fprofile", currentProfile.getFirstName());
+                                    JSONObject result = getFacebookBaseUserData(currentProfile, loginResult);
+                                    callbackContext.success(result);
+                                    mProfileTracker.stopTracking();
+                                }
+                            };
+                        } else {
+                            JSONObject result = getFacebookBaseUserData(profile, loginResult);
+                            callbackContext.success(result);
+                        }
                     }
 
                     @Override
@@ -337,9 +353,8 @@ public class Sso extends CordovaPlugin {
         return jsonUser;
     }
 
-    private JSONObject getFacebookBaseUserData(LoginResult result) {
-        Profile profile = Profile.getCurrentProfile();
-        Uri imageUri = profile.getProfilePictureUri(320,320);
+    private JSONObject getFacebookBaseUserData(Profile profile, LoginResult result) {
+        Uri imageUri = profile.getProfilePictureUri(320, 320);
         JSONObject jsonUser = new JSONObject();
         try {
             jsonUser.put("name", profile.getName());
@@ -349,7 +364,7 @@ public class Sso extends CordovaPlugin {
             jsonUser.put("userId", result.getAccessToken().getUserId());
             if (imageUri != null) {
                 jsonUser.put("image", imageUri.toString());
-            } 
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
