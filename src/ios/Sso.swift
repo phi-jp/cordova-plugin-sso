@@ -1,5 +1,6 @@
 import Foundation
 import LineSDK
+
 import TwitterKit
 import FBSDKCoreKit
 import FBSDKLoginKit
@@ -17,7 +18,7 @@ import AuthenticationServices
         // for LINE
         let lineChannelId = self.commandDelegate.settings["linechannelid"]
         LoginManager.shared.setup(channelID: lineChannelId as! String, universalLinkURL: nil)
-        
+            
         
         // for Twitter
         let consumerKey = self.commandDelegate.settings["twitterconsumerkey"] as? String
@@ -329,7 +330,7 @@ import AuthenticationServices
         return data;
     }
     
-    private func lineResponseObject(result: LoginResult) -> Dictionary<String, String> {
+    private func lineResponseObject(result: LineSDK.LoginResult) -> Dictionary<String, String> {
         
         var data = [:] as! [String : String]
         

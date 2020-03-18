@@ -98,8 +98,10 @@
         <source url="https://github.com/CocoaPods/Specs.git"/>
       </config>
       <pods use-frameworks="true">
-        <pod name="FBSDKLoginKit" spec="~> 5.11.0" />
-        <pod name="LineSDKSwift" spec="~> 5.4" />
+        <pod name="FBSDKCoreKit/Swift" spec="~> 5.11.0" />
+        <pod name="FBSDKLoginKit/Swift" spec="~> 5.11.0" />
+        <pod name="FBSDKShareKit/Swift" spec="~> 5.11.0" />
+        <pod name="LineSDKSwift" spec="~> 5.5.1" />
         <pod name="GoogleSignIn" spec="~> 4.4" />
         <pod name="GXTwitterKit" spec="~>3.4.5"/>
       </pods>
