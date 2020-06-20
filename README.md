@@ -17,7 +17,7 @@ $ pod setup
 and Install
 
 ```
-$ cordova plguin add cordova-plugin-sso --variable TWITTER_KEY=XXXX --variable TWITTER_SECRET=XXXX
+$ cordova plugin add cordova-plugin-sso --variable TWITTER_KEY=XXXX --variable TWITTER_SECRET=XXXX
 ```
 
 And add config.xml below code
