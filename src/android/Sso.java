@@ -85,7 +85,11 @@ public class Sso extends CordovaPlugin {
         }
 
         // initialize Facebook app id
-        FacebookSdk.sdkInitialize(cordova.getContext());
+        String facebookAppId = preferences.getString("FacebookAppId", ""); 
+        if (facebookAppId != "defaultValue") {
+            FacebookSdk.sdkInitialize(cordova.getContext());
+        }
+   
     }
 
     public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
