@@ -102,7 +102,7 @@
         <pod name="FBSDKLoginKit/Swift" spec="~> 5.11.0" />
         <pod name="FBSDKShareKit/Swift" spec="~> 5.11.0" />
         <pod name="LineSDKSwift" spec="~> 5.5.1" />
-        <pod name="GoogleSignIn" spec="~> 4.4" />
+        <pod name="GoogleSignIn" spec="5.0.2" />
         <pod name="GXTwitterKit" spec="3.4.6"/>
         
       </pods>
