@@ -7,7 +7,7 @@ import FBSDKLoginKit
 import GoogleSignIn
 import AuthenticationServices
 
-@objc(Sso) class Sso :CDVPlugin, GIDSignInDelegate, GIDSignInUIDelegate, ASAuthorizationControllerDelegate {
+@objc(Sso) class Sso :CDVPlugin, GIDSignInDelegate, ASAuthorizationControllerDelegate {
 
     
     var callbackId:String?
@@ -100,7 +100,7 @@ import AuthenticationServices
     @objc func loginWithGoogle(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId;
         GIDSignIn.sharedInstance().delegate = self;
-        GIDSignIn.sharedInstance().uiDelegate = self;
+        GIDSignIn.sharedInstance()?.presentingViewController = self.viewController
         GIDSignIn.sharedInstance().signIn();
     }
     // below two function has been needed when login for gogole
@@ -451,9 +451,7 @@ import AuthenticationServices
         
         // google 用
         if isFromGoogle {
-            GIDSignIn.sharedInstance().handle(url,
-                                              sourceApplication: sourceApplication,
-                                              annotation: an);
+            GIDSignIn.sharedInstance()?.handle(url)
         }
     }
 }
