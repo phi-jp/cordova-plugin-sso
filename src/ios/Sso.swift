@@ -99,6 +99,7 @@ import AuthenticationServices
     // for google
     @objc func loginWithGoogle(_ command: CDVInvokedUrlCommand) {
         self.callbackId = command.callbackId;
+        GIDSignIn.sharedInstance().signOut()
         GIDSignIn.sharedInstance().delegate = self;
         GIDSignIn.sharedInstance()?.presentingViewController = self.viewController
         GIDSignIn.sharedInstance().signIn();
